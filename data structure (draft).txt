@@ -1,0 +1,135 @@
+Battle: {
+	Turn: uint,
+	Target Turn: uint,
+	
+	Map Data: {
+		Grid Size: {ints x,y},
+		<const> Hex Size: {ints x,y},
+	},
+	
+	Ships: [ //Some of this will be shared/stored.
+		(index) Ship: { //The enemy ship will be updated by the server, since we can't have enough data to simulate it reliably. We can try for some implicit actions, though, and we simulate our own ship.
+			<const> Type: str, //Whatever we decide to name them.
+			Name: str, //Whatever the player decides to name them.
+			
+			Crew: [
+				(index) Crew Member: {//Becomes a boarding member after a teleport.
+					Name: str,
+					Number: (index) Crew Member,
+					~In Room: (index) Room,
+					Activity: str in ['dying', 'moving to', 'fighting', 'firefighting', 'reparing hull', 'repairing system', 'manning', 'idling'], //In order of precedence.
+					~Target Room: (index) Room,
+					Following Order: uint, //Some commands may have sub-parts. (eg, 'go' would expand to 'exit room in 10 frames', 'wait 100 frames', 'enter room over 10 frames') Each sub-command would be pushed into the commands stack, but if a command were cancelled early on we would not want to execute the later commands. We'll keep a record of the number of commands we've been issued, and ignore any that aren't the latest one. Note that implicit commands need to be careful not to override user-given orders.
+				},
+			*],
+			
+			Rooms: [
+				(index) Room: { //ie, 'forward engines'
+					Name: str,
+					Number: (index) Room,
+					Type: str in ['droids', 'shields', 'engineering', 'helm', 'medbay', 'oxygen', 'teleporter', 'weapons', 'storage'],
+					Effects: [
+						effect: {
+							Type: str in ['ion'],
+							Lives Until: Turn, //This is defined client-side, as it can always be known from the simple action of the enemy firing their ion cannon.
+						},
+					*],
+					<const> Size: uint 1, //This represents how many crew may be in the room at once. 3 for medbay, 2 for small teleporter, 4 for large?
+					crew: [Crew Member, *] //A list of the crew in the room. Might be a getter, deriving from Ship.Crew?
+					
+					//For rooms with subsystems:
+					<const> Consoles: uint 1, //This represents how many crew may apply their bonus to the room at once.
+					~Power: uint,
+					~Max Power: uint,
+					~Life: uint,
+					~Max Life: uint,
+					
+					//Droids:
+					~Bays: uint, //Number of droids we can run at once.
+					~Powermap: [uint foreach Bays],
+					
+					//Shields:
+					~Charge: uint,
+					~Max Charge: uint,
+					<const> ~Charge Rate: uint,
+					
+					//Engineering:
+					~FTL Status: uint,
+					
+					//Helm:
+					~Level: int in [0,1,2,3], //No autopilot, 25%, 50%, and 75%.
+					<implicit> ~Autopilot Percent: Level*25;
+					
+					//Medbay:
+					<const> ~Heal Rate: uint,
+					
+					//Oxygen:
+					<const> ~Production Rate: uint,
+					
+					//Teleporter:
+					~Charge: uint,
+					<const> ~Charge Rate: uint,
+					
+					//Weapons:
+					
+					//Storage:
+					~Level: uint in [0,1,2,3],
+					<implicit> ~Cargo Capacity: [0, 1.0, 1.6, 2.0][Level],
+				},
+			*],
+		}, 
+	*],
+	
+	Shots: [
+		(index) Shot: {
+			Type: 'name',
+			Fired On: Turn,
+			Land On: Turn, //Infinity for mines.
+		},
+	*],
+	
+	Initial State: <deepcopy> Ships,
+	
+	History: [ //A list of the past... I dunno, 120 ship states or so? 2 sec, at 50 fps. Delete old states, since it could pile up pretty fast.
+		frame: {
+			ships: <deepcopy> Ships,
+			turn: Turn,
+		},
+	*],
+	
+	Commands: [ //User-commanded commands, that is.
+		Turn Number: [
+			(index) Command: {
+				Issued On: Turn, //For sanity checking and rewinding.
+				~ Order Number: Subject["Following Order"]+1, //Only if we are ordering around a crew member. Weapons switches are pretty much instant, so they'll only ever be single-part commands.
+				Subject: Path, //A path of properties to find the right object. Like how [1,2,3] is a layer path in File Lister.
+				Command: "go" || "target" || "power" || "power", //And so on.
+				Target: int || Ships.Path, //implementation: Object.call(target[command], [Destination]) or something.
+			},
+		*],
+	*],
+}
+
+----------------
+Key:
+	* - An indetermininate number of entries like the previously listed.
+	~ - Not always present. eg, a crew member may be walking between rooms and so not be In Room.
+	
+Notes:
+- Check that socket.io can't recieve objects with getters/setters.
+- When sending a command, the path is relative to *your* ship, not the list of all ships.
+
+Program Flow:
+0) Check for commands from server, and add them to the Command list at index Turn.
+1.1) If the commands recieved were in a past Turn:
+	2.1) Rewind. Set the current state to the frame ("Issued On") of the past command.
+	3.1) Remove any newer frames from History. (They will be repopulated later.)
+1.2) Otherwise, 
+	2.2) Push a copy of the current state onto History.
+3) Generate a list of implicit Commands from State. (If the room is on fire, and you are not putting it out, it is implied you start puting it out.)
+4) Apply implicit Commands, and user Commands to the current state.
+5) Simulate the current state by one step.
+6.1) If the current Turn is smaller than the Target Turn, as set in step 2.1:
+	7.1) Repeat instructions from step 2.2.
+6.2) Otherwise,
+	7.2 Release control. (Draw the current state, abort, whatever.)

@@ -1,0 +1,9 @@
+#loading-indicator {
+	display:inline-block;
+}
+
+#grid-display {
+	width: 900px;
+	height: 600px;
+	background-image: url("images/hex2.svg"), url("images/Colesworth Shuttle.svg");
+}
