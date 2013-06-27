@@ -2,7 +2,7 @@
 //To launch: sudo nodejs hello\ worldode.js
 //Visit hello world.html to run from the browser.
 
-var port = "8078"
+var port = process.env.OPENSHIFT_NODEJS_PORT || "8078"
 
 var app = require('http').createServer();
 var io = require('socket.io').listen(app);

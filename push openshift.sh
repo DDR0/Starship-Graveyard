@@ -1,0 +1,1 @@
+ssh-agent bash -c 'ssh-add /home/david/.ssh/starship-graveyard; git push openshift master'
