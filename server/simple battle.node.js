@@ -1,8 +1,9 @@
-"use strict"
+"use strict";
 //To launch: sudo nodejs hello\ worldode.js
 //Visit hello world.html to run from the browser.
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || "8078"
+var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1"
+var port = process.env.OPENSHIFT_NODEJS_PORT || "8078";
 
 var app = require('http').createServer();
 var io = require('socket.io').listen(app);
@@ -11,15 +12,15 @@ io.set('log level', 2);
 var _ = require('underscore');
 var c = console;
 
-c.log('Listening on port '+port+'.')
-app.listen(port);
+c.log('Listening on port '+port+' at '+addr+'.');
+app.listen(port, addr);
 
 
 //--- Logic ---//
 
 var location = function(x,y,rot) {
 	return {x:x||0, y:y||0, rot/*ation*/:rot||0};
-}
+};
 
 var crew_member = function(name, race, sex, room_index) {return {
 	//__proto__: new location, //Location is implied by room.
