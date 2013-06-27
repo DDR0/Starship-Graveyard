@@ -1,0 +1,1 @@
+ssh-agent bash -c 'ssh-add /home/david/.ssh/starship-graveyard; git pull ssh://51cbd3d24382ec051f000035@sg-ddr0.rhcloud.com/~/git/sg.git/'

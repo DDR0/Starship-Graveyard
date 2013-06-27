@@ -5,18 +5,23 @@
 	
 	//Create a demo shape for our stage. It moves! :D
 	var shape = new createjs.Shape();
-	var g = shape.graphics;
-	g.setStrokeStyle(1);
-	g.beginStroke(createjs.Graphics.getRGB(0,0,0));
-	g.beginFill(createjs.Graphics.getRGB(255,0,0));
-	g.drawCircle(0,0,30);
-	shape.x = 45;
-	shape.y = 300;
-	stage.addChild(shape);
+	
+	var addCircle = function() {
+		var g = shape.graphics;
+		g.setStrokeStyle(1);
+		g.beginStroke(createjs.Graphics.getRGB(0,0,0));
+		g.beginFill(createjs.Graphics.getRGB(255,0,0));
+		g.drawCircle(0,0,30);
+		shape.x = 45;
+		shape.y = 300;
+		stage.addChild(shape);
+		createjs.Ticker.addEventListener("tick", function(event) {
+			shape.x += 2;
+		});
+	};
 	
 	//Subscribe to the 'tick' event create.js gives us. This is roughly equivalent to the native window.setInterval().
 	createjs.Ticker.addEventListener("tick", function(event) {
-		shape.x += 2;
 		stage.update();
 	});
 	
@@ -24,5 +29,5 @@
 	$('#loading-indicator').css('opacity', '0');
 	
 	//We will watch our ship for changes (such as it being loaded). We will just print the ship data to console, for now.
-	server.watchControlledShip(function(ship) {console.log('got ship', ship)})
+	server.watchControlledShip(addCircle)
 })();
