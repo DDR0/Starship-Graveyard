@@ -1,9 +1,10 @@
 (function(exportObj) {
 	"use strict";
-	var socket = io.connect(window.location.origin+":8079", {transports: ['websocket']});
-
+	//var socket = io.connect(window.location.origin+":8079", {transports: ['websocket']});
+	var socket = io.connect("http://sg-ddr0.rhcloud.com:8000", {transports: ['websocket']});
+	
 	var c = console;
-	var r = {log: function(data) {socket.emit('print', data)}};
+	var r = {log: function(data) {socket.emit('print', data);}};
 	
 	var controlledWatchers = []; //Watch only the ship you control for changes.
 	var enemyWatchers = [];
@@ -33,11 +34,11 @@
 		});
 	});
 
-	socket.on('reconnecting', function () {c.log('reconnecting')});
-	socket.on('reconnect', function () {c.log('reconnected')});
-	socket.on('connect_failed', function () {c.log('connection failure')});
-	socket.on('reconnect_failed', function () {c.log('reconnect failed')});
-	socket.on('error', function () {c.log('An error has occurred.')});
+	socket.on('reconnecting', function () {c.log('reconnecting');});
+	socket.on('reconnect', function () {c.log('reconnected');});
+	socket.on('connect_failed', function () {c.log('connection failure');});
+	socket.on('reconnect_failed', function () {c.log('reconnect failed');});
+	socket.on('error', function () {c.log('An error has occurred.');});
 	
 	exportObj.server = Object.create(null);
 	exportObj.server.watchAllShips = function(callback) { //Include a path var asap, to watch a variable of a ship.
