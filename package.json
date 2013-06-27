@@ -1,6 +1,4 @@
 {
-  "name": "Starship Graveyard Websocket Server",
+  "name": "sg",
   "version": "0.1.0",
-  "dependencies": {
-  }
 }
