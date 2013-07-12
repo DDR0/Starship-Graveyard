@@ -10,11 +10,11 @@ var battleWidth=20;
 var battleHeight=20;
 var backgroundImage=new Image();
 backgroundImage.src="images/tempBack.png";
-var canvasID=ctx;
+var canvasID=document.getElementById('grid-display').getContext('2d');
 //wait until script is loaded please 11
 var hexes=new Array(battleHeight)
 {
-	for(var x=0; x<this.lengh; x++)
+	for(var x=0; x<hexes.lengh; x++)
 	{
 		hexs[x]=new Array(battleWidth)
 		for(var y=0; y<hexes[x].length; y++)

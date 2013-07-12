@@ -80,13 +80,14 @@ var base=
 	hexifyImage: function(oldImage)
 	{
 		//okay so I don't know what exactly we are going to use when it comes to canvas so for now i will use ctx2 and ctx3 this function may not even be in base
-		var imagesWidth=(ctx2.width-ctx2.width%hexWidth)/hexWidth;//at present this will crop any partial hexes
-		var imagesHeight=(ctx2.height-ctx2.height%hexHeight)/hexHeght;
+		var imagesWidth=1+(ctx2.width-ctx2.width%hexWidth)/hexWidth;
+		var imagesHeight=1+(ctx2.height-ctx2.height%hexHeight)/hexHeght;
 		var newImages=array(imagesWdith);
 		var left;
 		var top;
 		var newImageX;
 		var newImageY;
+		var empty;
 		for(arrays in newImages)
 		{
 			arrays=array(imagesHeight);
@@ -117,8 +118,14 @@ var base=
 						newImageX-=hexWidth;
 						newImageY++;
 					}
-					if((newImageX*ratio+newImageY>topEnd)&&(newImageX*ratio+newImageY<bottomEnd)&&(newImageX*ratio-newImageY<-topEnd)&&(newImageX*ratio-newImageY>bottomEnd))//talk to Jarvis if this doesn’t quite work
+					if((newImageX+left>=pixels.width)||(newImageY+top>=pixels.height))
 					{
+						//we dont want to get pixels form outside the image
+						newPixels[index+3]=0;
+					}
+					else if((newImageX*ratio+newImageY>topEnd)&&(newImageX*ratio+newImageY<bottomEnd)&&(newImageX*ratio-newImageY<-topEnd)&&(newImageX*ratio-newImageY>bottomEnd))//talk to Jarvis if this doesn’t quite work
+					{
+						//only adds pixels into the hex area
 						for(var g=0;g<4;g++)
 						{
 							newPixels[index+g]=pixels[newImageX+newImageY*ctx2.width];
@@ -128,9 +135,18 @@ var base=
 					{
 						newPixels[index+3]=0;
 					}
+					if(newpixels[index+3]!=0)
+					{
+						//this sees if the hex is completely transparent, transparent hexes aren't added to the image array
+						empty=false;
+					}
 				}
 				ctx3.putImageData(newPixels);//may not work depending on how the pointers work
-				newImages=ctx3.getImage();//wrong function
+				if(!empty)
+				{
+					newImages[d][e]=new Image();
+					newImages[d][e].src=ctx3.getDataURL();
+				}
 			}
 		}
 		return newImages;
