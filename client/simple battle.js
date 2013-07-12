@@ -14,9 +14,9 @@ var canvasID=document.getElementById('grid-display').getContext('2d');
 //wait until script is loaded please 11
 var hexes=new Array(battleHeight)
 {
-	for(var x=0; x<hexes.lengh; x++)
+	for(var x=0; x<hexes.length; x++)
 	{
-		hexs[x]=new Array(battleWidth)
+		hexes[x]=new Array(battleWidth)
 		for(var y=0; y<hexes[x].length; y++)
 		{
 			hexes[x][y]=
@@ -32,32 +32,32 @@ var hexes=new Array(battleHeight)
 				seeRoom:null,
 				energyImage:null,
 				seeEnergy:false,
-				targets:new array(0),
+				targets:new Array(0),
 				pixelX:x*(hexWidth*3/4),
 				pixelY:(x%2===0)?(y*hexHeight):(hexHeight*(y+1/2)),
 				restack:function()
 				{
-					canvasID.drawImage(this.background, pixelX, pixelY);
-					if(seeShip&&shipImage!=null)
+					canvasID.drawImage(this.background, this.pixelX, this.pixelY);
+					if(this.seeShip&&this.shipImage!=null)
 					{var x=20
-						canvasID.drawImage(this.shipImage, pixelX, pixelY);
+						canvasID.drawImage(this.shipImage, this.pixelX, this.pixelY);
 					}
-					if(seeRoom&&roomImage!=null)
+					if(this.seeRoom&&this.roomImage!=null)
 					{
-						canvasID.drawImage(this.roomImage, pixelX, pixelY);
+						canvasID.drawImage(this.roomImage, this.pixelX, this.pixelY);
 						//probably should check the room here
 					}
-					if(seeEnergy&&energyImage!=null)
+					if(this.seeEnergy&&this.energyImage!=null)
 					{
-						canvasID.drawImage(this.energyImage, pixelX, pixelY);
+						canvasID.drawImage(this.energyImage, this.pixelX, this.pixelY);
 					}
-					if(seeShield&&shieldImage!=null)
+					if(this.seeShield&&this.shieldImage!=null)
 					{
-						canvasID.drawImage(this.ShieldImage, pixelX, pixelY);
+						canvasID.drawImage(this.ShieldImage, this.pixelX, this.pixelY);
 					}
-					for(var z=0; z<targets.length; z++)
+					for(var z=0; z<this.targets.length; z++)
 					{
-						canvasID.drawImage(this.targets[z]);
+						canvasID.drawImage(this.targets[z],this.pixleX, this.pixelY);
 					}
 				},
 
@@ -73,9 +73,12 @@ return distance;
 		}
 	}
 }
-for(var k in hexes)
+for(var k=0;k<hexes.length;k++)
 {
-	k.restack();
+	for(var l=0;l<hexes[k].length;l++)
+	{
+		hexes[k][l].restack();
+		console.log('why');
+	}
 }
-
 })();
