@@ -73,12 +73,15 @@ return distance;
 		}
 	}
 }
+
+backgroundImage.addEventListener('load',  function() {
 for(var k=0;k<hexes.length;k++)
 {
 	for(var l=0;l<hexes[k].length;l++)
 	{
 		hexes[k][l].restack();
-		console.log('why');
 	}
 }
+}); //This event will be fired when the image loads.
+
 })();
