@@ -118,8 +118,8 @@ var base=
 			arrays=Array(imagesHeight);
 		}
 		ctx2.drawImage(oldImage,0,0);
-		var pixels=ctx2.getImageData(0,0,ctx2.width,ctx2.height);
-		var newPixels=ctx3.getImageData(0,0,ctx3.width,ctx3.height);
+		var pixels=ctx2.getImageData(0,0,ctx2.canvas.width,ctx2.canvas.height);
+		var newPixels=ctx3.getImageData(0,0,ctx3.canvas.width,ctx3.canvas.height);
 		for(var d=0;d<images.length;d++)
 		{
 			left=d*this.hexWidth*3/4
