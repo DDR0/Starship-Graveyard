@@ -205,7 +205,10 @@ var base=
 					{//updates the graphics for the specified hex
 						console.log(''+this.coordinateX+' '+this.coordinateY);
 						if(this.background!=null)
-						base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
+						{
+							this.background.addEventListener('load', base.canvasID.drawImage(this.background, this.pixelX, this.pixelY));
+							base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
+						}
 						if(this.seeShip&&this.shipImage!=null)
 						{
 							base.canvasID.drawImage(this.shipImage, this.pixelX, this.pixelY);
