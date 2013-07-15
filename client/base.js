@@ -106,25 +106,26 @@ var base=
 		});
 		var ctx3=c[0].getContext('2d');
 		var imagesWidth=1+(oldImage.width-(oldImage.width%this.hexWidth))/this.hexWidth;
-		var imagesHeight=1+(oldImage.height-(oldImage.height%this.hexWeight))/this.hexWeght;
+		var imagesHeight=1+(oldImage.height-(oldImage.height%this.hexHeight))/this.hexHeight;
+		console.log(imagesHeight);
 		var left;
 		var top;
 		var newImageX;
 		var newImageY;
 		var empty;
 		var newImages=Array(imagesWidth);
-		for(arrays in newImages)
+		for(var q=0;q<newImages.length;q++)
 		{
-			arrays=Array(imagesHeight);
+			newImages[q]=Array(imagesHeight);
 		}
 		ctx2.drawImage(oldImage,0,0);
 		var pixels=ctx2.getImageData(0,0,ctx2.canvas.width,ctx2.canvas.height);
 		var newPixels=ctx3.getImageData(0,0,ctx3.canvas.width,ctx3.canvas.height);
-		for(var d=0;d<images.length;d++)
+		for(var d=0;d<newImages.length;d++)
 		{
 			left=d*this.hexWidth*3/4
 			newImageX=left
-			for(var e=0;e<images[d].length;e++)
+			for(var e=0;e<newImages[d].length;e++)
 			{
 				top=this.hexWeight*e;
 				if(e%2===1)
@@ -166,12 +167,11 @@ var base=
 						empty=false;
 					}
 				}
-				ctx3.putImageData(newPixels);//may not work depending on how the pointers work
+				ctx3.putImageData(newPixels,0,0);//may not work depending on how the pointers work
 				if(!empty)
 				{
 					newImages[d][e]=new Image();
-					newImages[d][e].src=ctx3.getDataURL();
-					console.log(newImages[d][e].src);
+					newImages[d][e].src=c[0].toDataURL();
 				}
 			}
 		}
@@ -179,13 +179,13 @@ var base=
 	},
 	newHexes:function()
 	{
-		hexes=new Array(this.battleHeight)
-		for(var x=0; x<hexes.length; x++)
+		this.hexes=new Array(this.battleHeight)
+		for(var x=0; x<this.hexes.length; x++)
 		{
-			hexes[x]=new Array(this.battleWidth)
-			for(var y=0; y<hexes[x].length; y++)
+			this.hexes[x]=new Array(this.battleWidth)
+			for(var y=0; y<this.hexes[x].length; y++)
 			{
-				hexes[x][y]=
+				this.hexes[x][y]=
 				{
 					coordinateX:x,
 					coordinateY:y,
@@ -203,7 +203,8 @@ var base=
 					pixelY:(x%2===0)?(y*this.hexWeight):(this.hexWeight*(y+1/2)),
 					restack:function()
 					{//updates the graphics for the specified hex
-						console.log(this.background.src);
+						console.log(''+this.coordinateX+' '+this.coordinateY);
+						if(this.background!=null)
 						base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
 						if(this.seeShip&&this.shipImage!=null)
 						{
@@ -240,11 +241,11 @@ var base=
 	},
 	restackAll:function()
 	{// restacks all the hexes
-		for(var m=0;m<hexes.length;m++)
+		for(var m=0;m<this.hexes.length;m++)
 		{
-			for(var n=0;n<hexes.length;n++)
+			for(var n=0;n<this.hexes.length;n++)
 			{
-				hexes[m][n].restack();
+				this.hexes[m][n].restack();
 			}
 		}
 	},
