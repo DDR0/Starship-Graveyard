@@ -2,17 +2,15 @@ var base=
 {
 	hexHeight:34,//still not final
 	hexWidth:40,//still not final
-	hexRatio:(this.hexHeight/this.hexWidth/2),
+	hexRatio:(0.425),
 	battleHeight:20,
 	battleWidth:20,
-	topEnd:(this.hexHeight/2),
-	bottomEnd:(this.topEnd*3),
+	intercept:(17),
 	server:false,
 	hexes:null,
 	canvasID:document.getElementById('grid-display').getContext('2d'),
 	hexify:function(pixelX,pixelY)
 	{// I created this function to tell which hex the player has clicked on
-		console.log("why");
 		var map=
 		{
 			x:pixelX/(this.hexWidth*3/4),
@@ -31,7 +29,7 @@ var base=
 				}
 				else
 				{
-					if(((pixelX%this.hexHeight)*ratio-(pixelY%this.hexWidth))<this.topEnd)
+					if(((pixelX%this.hexHeight)*this.hexRatio-(pixelY%this.hexWidth))<this.topEnd)
 					{
 						map.x-=1;
 					}
@@ -41,14 +39,14 @@ var base=
 			{
 				if((pixelY%this.hexHeight)<this.hexHeight/2)
 				{
-					if(((pixelX%this.hexHeight)*ratio-(pixelY%this.hexWidth))<this.topEnd)
+					if(((pixelX%this.hexHeight)*this.hexRatio-(pixelY%this.hexWidth))<this.topEnd)
 					{
 						map.x-=1;
 					}
 				}
 				else
 				{
-					if(((pixelX%this.hexHeight)*ratio+(pixelY%this.hexWidth))<this.topEnd)
+					if(((pixelX%this.hexHeight)*this.hexRatio+(pixelY%this.hexWidth))<this.topEnd)
 					{
 						map.x-=1;
 					}
@@ -83,7 +81,8 @@ var base=
 	},
 	hexifyImage: function(oldImage)
 	{
-		console.log("why");
+		if(false)
+			console.log("why");
 		//okay so I don't know what exactly we are going to use when it comes to canvas so for now i will use ctx2 and ctx3 this function may not even be in base
 		var c = $("<canvas>")
 		.attr({
@@ -107,7 +106,8 @@ var base=
 		var ctx3=c[0].getContext('2d');
 		var imagesWidth=1+(oldImage.width-(oldImage.width%this.hexWidth))/this.hexWidth;
 		var imagesHeight=1+(oldImage.height-(oldImage.height%this.hexHeight))/this.hexHeight;
-		console.log(imagesHeight);
+		if(true)
+			console.log(imagesHeight);
 		var left;
 		var top;
 		var newImageX;
@@ -123,55 +123,72 @@ var base=
 		var newPixels=ctx3.getImageData(0,0,ctx3.canvas.width,ctx3.canvas.height);
 		for(var d=0;d<newImages.length;d++)
 		{
-			left=d*this.hexWidth*3/4
-			newImageX=left
+			left=d*this.hexWidth*3/4;
+			newImageX=left;
+			newImageX--;//this is important because newImageX is automatically increased at the start of the loop
 			for(var e=0;e<newImages[d].length;e++)
 			{
-				top=this.hexWeight*e;
-				if(e%2===1)
+				top=this.hexHeight*e;
+				if(d%2==1)
 				{
-					top+=(this.hexWeight/2)
+					top+=(this.hexWidth/2)
 				}
+				if(false)
+					console.log(top);
 				newImageY=top;
-				for(var index=0;index<newPixels.length;index+=4)
+				empty=true;
+				for(var index=0;index<newPixels.data.length;index+=4)
 				{
-					if(newImageX>left+this.hexWidth)
+					if(newImageX<left+this.hexWidth-1)
 					{
 						newImageX++;
 					}
 					else
 					{
-						newImageX-=this.hexWidth;
+						newImageX=left;
 						newImageY++;
 					}
-					if((newImageX+left>=pixels.width)||(newImageY+top>=pixels.height))
+					if(false)
+					{
+						console.log((((newImageX-left)*this.hexRatio)-(newImageY-top)));
+						console.log(""+((newImageX-left)*this.hexRatio+newImageY-top>this.intercept)+' '+(((newImageX-left))*this.hexRatio+newImageY-top<(5*this.intercept))+' '+((newImageX-left)*this.hexRatio-(newImageY-top)<(3*this.intercept))+' '+((newImageX-left)*this.hexRatio-(newImageY-top)>-this.intercept));
+					}
+					if((newImageX>=pixels.width)||(newImageY>=pixels.height))
 					{
 						//we dont want to get pixels form outside the image
+						if(false)
+							console.log(''+newImageX+' '+newImageY);
 						newPixels[index+3]=0;
 					}
-					else if((newImageX*ratio+newImageY>this.topEnd)&&(newImageX*ratio+newImageY<this.bottomEnd)&&(newImageX*ratio-newImageY<-this.topEnd)&&(newImageX*ratio-newImageY>this.bottomEnd))//talk to Jarvis if this doesn’t quite work
+					else if(((newImageX-left)*this.hexRatio+newImageY-top>this.intercept)&&((newImageX-left)*this.hexRatio+newImageY-top<5*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top<3*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top>-this.intercept))//talk to Jarvis if this doesn’t quite work
 					{
 						//only adds pixels into the hex area
 						for(var g=0;g<4;g++)
 						{
-							newPixels[index+g]=pixels[newImageX+newImageY*ctx2.width];
+							newPixels.data[index+g]=pixels.data[newImageX+newImageY*ctx2.canvas.width];//fuuuuuuuu here it was
+							if(false)
+								console.log(newPixels.data[index+g]+' here '+pixels.data[newImageX+newImageY*ctx2.canvas.width]);
 						}
 					}
 					else
 					{
 						newPixels[index+3]=0;
+						if(false)
+							console.log(''+d+' '+e+' '+index+' '+newImageX+' '+newImageY);
 					}
-					if(newpixels[index+3]!=0)
+					if(newPixels.data[index+3]!=0)
 					{
 						//this sees if the hex is completely transparent, transparent hexes aren't added to the image array
 						empty=false;
 					}
 				}
+				console.log(empty);
 				ctx3.putImageData(newPixels,0,0);//may not work depending on how the pointers work
 				if(!empty)
 				{
 					newImages[d][e]=new Image();
 					newImages[d][e].src=c[0].toDataURL();
+					console.log(c[0].toDataURL());
 				}
 			}
 		}
@@ -200,12 +217,15 @@ var base=
 					seeEnergy:false,
 					targets:new Array(0),
 					pixelX:x*(this.hexWidth*3/4),
-					pixelY:(x%2===0)?(y*this.hexWeight):(this.hexWeight*(y+1/2)),
+					pixelY:(x%2===0)?(y*this.hexHeight):(this.hexHeight*(y+1/2)),
 					restack:function()
 					{//updates the graphics for the specified hex
-						console.log(''+this.coordinateX+' '+this.coordinateY);
+						if(false)
+							console.log(''+this.coordinateX+' '+this.coordinateY);
 						if(this.background!=null)
 						{
+							if(false)
+								console.log(this.background.width);
 							this.background.addEventListener('load', base.canvasID.drawImage(this.background, this.pixelX, this.pixelY));
 							base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
 						}
@@ -271,8 +291,12 @@ var base=
 		this.restackAll();
 	}
 }
+if(false)
+	console.log(base.hexHeight/base.hexWidth/2);
 var backgroundImage=new Image();
-backgroundImage.src="images/Space Background.png";
+backgroundImage.src="http://annesastronomynews.com/wp-content/uploads/2012/07/Binary-Star-2-Photo.jpg";
+if(false)
+	console.log(backgroundImage.length);
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
