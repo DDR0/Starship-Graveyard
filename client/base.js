@@ -2,7 +2,7 @@ var base=
 {
 	hexHeight:34,//still not final
 	hexWidth:40,//still not final
-	hexRatio:(0.425),
+	hexRatio:(1.7),
 	battleHeight:20,
 	battleWidth:20,
 	intercept:(17),
@@ -136,6 +136,7 @@ var base=
 				if(false)
 					console.log(top);
 				newImageY=top;
+				newImageX=left-1;
 				empty=true;
 				for(var index=0;index<newPixels.data.length;index+=4)
 				{
@@ -160,14 +161,14 @@ var base=
 							console.log(''+newImageX+' '+newImageY);
 						newPixels[index+3]=0;
 					}
-					else if(((newImageX-left)*this.hexRatio+newImageY-top>this.intercept)&&((newImageX-left)*this.hexRatio+newImageY-top<5*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top<3*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top>-this.intercept))//talk to Jarvis if this doesn’t quite work
+					else if(((newImageX-left)*this.hexRatio+newImageY-top>=this.intercept)&&((newImageX-left)*this.hexRatio+newImageY-top<=5*this.intercept)&&((newImageX-left)*this.hexRatio-(newImageY-top)<=3*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top>=-this.intercept))//talk to Jarvis if this doesn’t quite work
 					{
 						//only adds pixels into the hex area
 						for(var g=0;g<4;g++)
 						{
-							newPixels.data[index+g]=pixels.data[newImageX+newImageY*ctx2.canvas.width];//fuuuuuuuu here it was
+							newPixels.data[index+g]=pixels.data[4*newImageX+4*newImageY*ctx2.canvas.width+g];
 							if(false)
-								console.log(newPixels.data[index+g]+' here '+pixels.data[newImageX+newImageY*ctx2.canvas.width]);
+								console.log(newPixels.data[index+g]+' here '+pixels.data[4*newImageX+4*newImageY*ctx2.canvas.width+g]);
 						}
 					}
 					else
@@ -294,13 +295,15 @@ var base=
 if(false)
 	console.log(base.hexHeight/base.hexWidth/2);
 var backgroundImage=new Image();
-backgroundImage.src="http://annesastronomynews.com/wp-content/uploads/2012/07/Binary-Star-2-Photo.jpg";
+backgroundImage.src="images/Space Background.png";
+backgroundImage.src="http://askreu.com/wp-content/uploads/2012/08/gradient_1600x1200.jpg";
 if(false)
 	console.log(backgroundImage.length);
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
+	base.restackAll();
 }); //This event will be fired when the image loads.
 
 
