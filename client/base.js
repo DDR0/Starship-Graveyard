@@ -104,10 +104,8 @@ var base=
 			"pointer-events": "none",
 		});
 		var ctx3=c[0].getContext('2d');
-		var imagesWidth=1+(oldImage.width-(oldImage.width%this.hexWidth))/this.hexWidth;
+		var imagesWidth=1+(oldImage.width-(oldImage.width%this.hexWidth))/this.hexWidth;//Jarvis should fix this
 		var imagesHeight=1+(oldImage.height-(oldImage.height%this.hexHeight))/this.hexHeight;
-		if(true)
-			console.log(imagesHeight);
 		var left;
 		var top;
 		var newImageX;
@@ -120,62 +118,69 @@ var base=
 		}
 		ctx2.drawImage(oldImage,0,0);
 		var pixels=ctx2.getImageData(0,0,ctx2.canvas.width,ctx2.canvas.height);
+		if(true)
+			console.log(pixels.width);
 		var newPixels=ctx3.getImageData(0,0,ctx3.canvas.width,ctx3.canvas.height);
 		for(var d=0;d<newImages.length;d++)
 		{
 			left=d*this.hexWidth*3/4;
-			newImageX=left;
-			newImageX--;//this is important because newImageX is automatically increased at the start of the loop
 			for(var e=0;e<newImages[d].length;e++)
 			{
 				top=this.hexHeight*e;
 				if(d%2==1)
 				{
-					top+=(this.hexWidth/2)
+					top+=(this.hexWidth/2-3)//need to figure out why -3
 				}
 				if(false)
 					console.log(top);
-				newImageY=top;
-				newImageX=left-1;
+				newImageY=0;
+				newImageX=-1;
 				empty=true;
+				//empty the newPixels data
+				for(var index=0;index<newPixels.data.length;index++)
+				{
+					newPixels.data[index]=0;
+				}
 				for(var index=0;index<newPixels.data.length;index+=4)
 				{
-					if(newImageX<left+this.hexWidth-1)
+					if((newImageX+left)<left+this.hexWidth-1)
 					{
 						newImageX++;
 					}
 					else
 					{
-						newImageX=left;
+						newImageX=0;
 						newImageY++;
 					}
 					if(false)
 					{
-						console.log((((newImageX-left)*this.hexRatio)-(newImageY-top)));
-						console.log(""+((newImageX-left)*this.hexRatio+newImageY-top>this.intercept)+' '+(((newImageX-left))*this.hexRatio+newImageY-top<(5*this.intercept))+' '+((newImageX-left)*this.hexRatio-(newImageY-top)<(3*this.intercept))+' '+((newImageX-left)*this.hexRatio-(newImageY-top)>-this.intercept));
+						console.log(((newImageX*this.hexRatio)-(newImageY)));
+						console.log(""+(newImageX*this.hexRatio+newImageY>this.intercept)+' '+((newImageX)*this.hexRatio+newImageY<(5*this.intercept))+' '+(newImageX*this.hexRatio-(newImageY)<(3*this.intercept))+' '+(newImageX*this.hexRatio-(newImageY)>-this.intercept));
 					}
-					if((newImageX>=pixels.width)||(newImageY>=pixels.height))
+					if(((newImageX+left)>=pixels.width)||((newImageY+top)>=pixels.height))
 					{
 						//we dont want to get pixels form outside the image
 						if(false)
-							console.log(''+newImageX+' '+newImageY);
-						newPixels[index+3]=0;
+							console.log(''+(newImageX+left)+' '+(newImageY+top));
+						newPixels.data[index+1]=200;
+						newPixels.data[index+3]=250;
 					}
-					else if(((newImageX-left)*this.hexRatio+newImageY-top>=this.intercept)&&((newImageX-left)*this.hexRatio+newImageY-top<=5*this.intercept)&&((newImageX-left)*this.hexRatio-(newImageY-top)<=3*this.intercept)&&((newImageX-left)*this.hexRatio-newImageY-top>=-this.intercept))//talk to Jarvis if this doesn’t quite work
+					else if((newImageX*this.hexRatio+newImageY>=this.intercept)&&(newImageX*this.hexRatio+newImageY<=5*this.intercept)&&(newImageX*this.hexRatio-(newImageY)<=3*this.intercept)&&(newImageX*this.hexRatio-newImageY>=-this.intercept))//talk to Jarvis if this doesn’t quite work
 					{
 						//only adds pixels into the hex area
 						for(var g=0;g<4;g++)
 						{
-							newPixels.data[index+g]=pixels.data[4*newImageX+4*newImageY*ctx2.canvas.width+g];
+							newPixels.data[index+g]=pixels.data[4*(newImageX+left)+4*(newImageY+top)*ctx2.canvas.width+g];
 							if(false)
-								console.log(newPixels.data[index+g]+' here '+pixels.data[4*newImageX+4*newImageY*ctx2.canvas.width+g]);
+								console.log(newPixels.data[index+g]+' here '+pixels.data[4*(newImageX+left)+4*(newImageY+top)*ctx2.canvas.width+g]);
 						}
 					}
 					else
 					{
-						newPixels[index+3]=0;
+						newPixels.data[index+2]=250;
+						newPixels.data[index+3]=5;
 						if(false)
-							console.log(''+d+' '+e+' '+index+' '+newImageX+' '+newImageY);
+							console.log(''+d+' '+e+' '+index+' '+(newImageX+left)+' '+(newImageY+top));
 					}
 					if(newPixels.data[index+3]!=0)
 					{
@@ -296,7 +301,6 @@ if(false)
 	console.log(base.hexHeight/base.hexWidth/2);
 var backgroundImage=new Image();
 backgroundImage.src="images/Space Background.png";
-backgroundImage.src="http://askreu.com/wp-content/uploads/2012/08/gradient_1600x1200.jpg";
 if(false)
 	console.log(backgroundImage.length);
 backgroundImage.addEventListener('load',  function()
