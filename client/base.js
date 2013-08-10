@@ -79,10 +79,8 @@ var base=
 		square.y=hexZ+hexY-((hexY+1-((hexY+1)%2))/2);//ill check these later
 		return square;
 	},
-	hexifyImage: function(oldImage)
+	hexifyImage:function(oldImage)
 	{
-		if(false)
-			console.log("why");
 		//okay so I don't know what exactly we are going to use when it comes to canvas so for now i will use ctx2 and ctx3 this function may not even be in base
 		var c = $("<canvas>")
 		.attr({
@@ -104,22 +102,22 @@ var base=
 			"pointer-events": "none",
 		});
 		var ctx3=c[0].getContext('2d');
-		var imagesWidth=1+(oldImage.width-(oldImage.width%this.hexWidth))/this.hexWidth;//Jarvis should fix this
 		var imagesHeight=1+(oldImage.height-(oldImage.height%this.hexHeight))/this.hexHeight;
+		var imagesWidth=1+(oldImage.width-((oldImage.width-this.hexWidth/4)%(this.hexWidth*3/4))-this.hexWidth/4)*4/3/this.hexWidth;
 		var left;
 		var top;
 		var newImageX;
 		var newImageY;
 		var empty;
 		var newImages=Array(imagesWidth);
+		var srcs=Array(imagesWidth);
 		for(var q=0;q<newImages.length;q++)
 		{
-			newImages[q]=Array(imagesHeight);
+			newImages[q]=new Array(imagesHeight);
+			srcs[q]=new Array(imagesHeight);
 		}
 		ctx2.drawImage(oldImage,0,0);
 		var pixels=ctx2.getImageData(0,0,ctx2.canvas.width,ctx2.canvas.height);
-		if(true)
-			console.log(pixels.width);
 		var newPixels=ctx3.getImageData(0,0,ctx3.canvas.width,ctx3.canvas.height);
 		for(var d=0;d<newImages.length;d++)
 		{
@@ -129,10 +127,8 @@ var base=
 				top=this.hexHeight*e;
 				if(d%2==1)
 				{
-					top+=(this.hexWidth/2-3)//need to figure out why -3
+					top+=(this.hexHeight/2)//need to figure out why -3
 				}
-				if(false)
-					console.log(top);
 				newImageY=0;
 				newImageX=-1;
 				empty=true;
@@ -152,16 +148,9 @@ var base=
 						newImageX=0;
 						newImageY++;
 					}
-					if(false)
-					{
-						console.log(((newImageX*this.hexRatio)-(newImageY)));
-						console.log(""+(newImageX*this.hexRatio+newImageY>this.intercept)+' '+((newImageX)*this.hexRatio+newImageY<(5*this.intercept))+' '+(newImageX*this.hexRatio-(newImageY)<(3*this.intercept))+' '+(newImageX*this.hexRatio-(newImageY)>-this.intercept));
-					}
 					if(((newImageX+left)>=pixels.width)||((newImageY+top)>=pixels.height))
 					{
 						//we dont want to get pixels form outside the image
-						if(false)
-							console.log(''+(newImageX+left)+' '+(newImageY+top));
 						newPixels.data[index+1]=200;
 						newPixels.data[index+3]=250;
 					}
@@ -171,16 +160,11 @@ var base=
 						for(var g=0;g<4;g++)
 						{
 							newPixels.data[index+g]=pixels.data[4*(newImageX+left)+4*(newImageY+top)*ctx2.canvas.width+g];
-							if(false)
-								console.log(newPixels.data[index+g]+' here '+pixels.data[4*(newImageX+left)+4*(newImageY+top)*ctx2.canvas.width+g]);
 						}
 					}
 					else
 					{
-						newPixels.data[index+2]=250;
-						newPixels.data[index+3]=5;
-						if(false)
-							console.log(''+d+' '+e+' '+index+' '+(newImageX+left)+' '+(newImageY+top));
+						newPixels.data[index+3]=0;
 					}
 					if(newPixels.data[index+3]!=0)
 					{
@@ -188,14 +172,20 @@ var base=
 						empty=false;
 					}
 				}
-				console.log(empty);
 				ctx3.putImageData(newPixels,0,0);//may not work depending on how the pointers work
 				if(!empty)
 				{
 					newImages[d][e]=new Image();
-					newImages[d][e].src=c[0].toDataURL();
-					console.log(c[0].toDataURL());
+					var src=c[0].toDataURL();
+					srcs[d][e]=src;
 				}
+			}
+		}
+		for(var r=0;r<srcs.length;r++)
+		{
+			for(var s=0;s<srcs[r].length;s++)
+			{
+				newImages[r][s].src=srcs[r][s];
 			}
 		}
 		return newImages;
@@ -226,12 +216,8 @@ var base=
 					pixelY:(x%2===0)?(y*this.hexHeight):(this.hexHeight*(y+1/2)),
 					restack:function()
 					{//updates the graphics for the specified hex
-						if(false)
-							console.log(''+this.coordinateX+' '+this.coordinateY);
 						if(this.background!=null)
 						{
-							if(false)
-								console.log(this.background.width);
 							this.background.addEventListener('load', base.canvasID.drawImage(this.background, this.pixelX, this.pixelY));
 							base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
 						}
@@ -297,17 +283,14 @@ var base=
 		this.restackAll();
 	}
 }
-if(false)
-	console.log(base.hexHeight/base.hexWidth/2);
 var backgroundImage=new Image();
 backgroundImage.src="images/Space Background.png";
-if(false)
-	console.log(backgroundImage.length);
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
 	base.restackAll();
+	setTimeout(	base.restackAll(),10000);
 }); //This event will be fired when the image loads.
 
 
