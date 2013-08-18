@@ -178,6 +178,8 @@ var base=
 					newImages[d][e]=new Image();
 					var src=c[0].toDataURL();
 					srcs[d][e]=src;
+					newImages[d][e].src=src;
+					ctx3.putImageData(newPixels,0,0);
 				}
 			}
 		}
@@ -186,6 +188,7 @@ var base=
 			for(var s=0;s<srcs[r].length;s++)
 			{
 				newImages[r][s].src=srcs[r][s];
+				console.log(newImages[r][s].src);
 			}
 		}
 		return newImages;
@@ -206,8 +209,8 @@ var base=
 					shipImage:null,
 					shipPointer:null,
 					seeShip:false,
-					roomImage:null,
-					roomPointer:null,
+					compImage:null,
+					compPointer:null,
 					seeRoom:null,
 					energyImage:null,
 					seeEnergy:false,
@@ -225,10 +228,10 @@ var base=
 						{
 							base.canvasID.drawImage(this.shipImage, this.pixelX, this.pixelY);
 						}
-						if(this.seeRoom&&this.roomImage!=null)
+						if(this.seeRoom&&this.compImage!=null)
 						{
-							base.canvasID.drawImage(this.roomImage, this.pixelX, this.pixelY);
-							//probably should check the room here
+							base.canvasID.drawImage(this.compImage, this.pixelX, this.pixelY);
+							//probably should check the comp here
 						}
 						if(this.seeEnergy&&this.energyImage!=null)
 						{

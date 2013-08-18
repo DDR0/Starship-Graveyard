@@ -28,8 +28,8 @@
 						shipImage:null,
 						shipPointer:null,
 						seeShip:false,
-						roomImage:null,
-						roomPointer:null,
+						compImage:null,
+						compPointer:null,
 						seeRoom:null,
 						energyImage:null,
 						seeEnergy:false,
@@ -43,10 +43,10 @@
 							{
 								canvasID.drawImage(this.shipImage, this.pixelX, this.pixelY);
 							}
-							if(this.seeRoom&&this.roomImage!=null)
+							if(this.seeRoom&&this.compImage!=null)
 							{
-								canvasID.drawImage(this.roomImage, this.pixelX, this.pixelY);
-								//probably should check the room here
+								canvasID.drawImage(this.compImage, this.pixelX, this.pixelY);
+								//probably should check the comp here
 							}
 							if(this.seeEnergy&&this.energyImage!=null)
 							{
