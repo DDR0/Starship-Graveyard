@@ -8,7 +8,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	comps:[],//both comps and images will become 2D ragged arrays when comps are added
 	images:[],
 	destroyed;[],//destroyed contains an array of images representing the ship full of holes
-	updateCenter:function
+	updateCenter:function()
 	{
 		//component 
 		//updates the centre hex relative to the ship its not super accurate it should really involve squaring sum numbers but it'll work for what we want
