@@ -247,26 +247,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		this.drawImages();
 	},
 }
-//most of the component code will be on the server
-var emptyComponent=
+function()
 {
-	//I don't know how many of these are going to be on the server, client or both
-	//Let really want to handle base current and attributes you can handle the others if you want
-	base:null,//the base stats that are returned to when the component is repaired includes max health
-	current:null,//the current stats that are effected by the battle includes current health
-	attribute:null,//will be a map of booleans stating whether or not the ship has an attribute
-	material:null,//the material or armoUr the component is made out of
-	enviroment:null,//a map with the temp gases and other environmental information
-	crew:null,//an array of all crew in the component
-	name:null,
-	desctiption;null;,
-	image;null,//the image or icon of the comp
-	location;null,//pointer to a hex
-	partof;null,//pointer to the ship
-	shipX:null,
-	shipY:null,
-	isSolid;true,//does the component block other comps don't actually know why I have this but i put it in the code
-	isDestroyed;false,
-}
-{
+		
 }

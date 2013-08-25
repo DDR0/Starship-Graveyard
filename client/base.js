@@ -188,7 +188,6 @@ var base=
 			for(var s=0;s<srcs[r].length;s++)
 			{
 				newImages[r][s].src=srcs[r][s];
-				console.log(newImages[r][s].src);
 			}
 		}
 		return newImages;
@@ -284,9 +283,41 @@ var base=
 			}
 		}
 		this.restackAll();
+	},
+	canvasClicked:function(event)
+	{
+		var windowX=event.clientX;
+		var windowY=event.clientY;
+		alert(""+windowX+" "+windowY);
+		console.log(hexify(windowX-canvasID.clientLeft,windowY-canvasID.clientTop));
+		
+	},
+	//most of the component code will be on the server
+	emptyComponent:
+	{
+		//I don't know how many of these are going to be on the server, client or both
+		//Let really want to handle base current and attributes you can handle the others if you want
+		base:null,//the base stats that are returned to when the component is repaired includes max health
+		current:null,//the current stats that are effected by the battle includes current health
+		attribute:null,//will be a map of booleans stating whether or not the ship has an attribute
+		material:null,//the material or armoUr the component is made out of
+		enviroment:null,//a map with the temp gases and other environmental information
+		actionList:[],
+		isSelected:false,
+		crew:null,//an array of all crew in the component
+		name:null,
+		desctiption:null,
+		image:null,//the image or icon of the comp
+		location:null,//pointer to a hex
+		partof:null,//pointer to the ship
+		shipX:null,
+		shipY:null,
+		isSolid:true,//does the component block other comps don't actually know why I have this but i put it in the code
+		isDestroyed:false,
 	}
 }
 var backgroundImage=new Image();
+base.canvasID.onclick=base.canvasClicked;
 backgroundImage.src="images/Space Background.png";
 backgroundImage.addEventListener('load',  function()
 {

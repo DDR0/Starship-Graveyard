@@ -23,7 +23,7 @@ var actions=
 		this.updateButtons();
 	},
 	updateButtons:function()
-	}
+	{
 		if(this.actionList.length<this.totalButtons)
 			for(var ad=0;ad<this.actionList.length;ad++)
 			{
@@ -63,7 +63,7 @@ var actions=
 	{
 		this.scroll--;
 		this.updateButtons();
-	}
+	},
 	scrollDown:function()
 	{
 		this.scroll++;
