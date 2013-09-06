@@ -10,8 +10,7 @@ var actions=
 		for(var ac=0;ac<this.totalButtons;ac++)
 		{
 			this.buttons.push(document.getElementById('button'+ac));
-			console.log(this.buttons.length);
-			this.buttons[ac].innerHTML="";
+			this.buttons[ac].innerHTML=this.blank;
 			this.buttons[ac].width=200;
 			this.buttons[ac].height=20;//don't know if these are the right variables.
 		}

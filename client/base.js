@@ -8,61 +8,44 @@ var base=
 	intercept:(17),
 	server:false,
 	hexes:null,
-	canvasID:document.getElementById('grid-display').getContext('2d'),
+	coursor:null,
+	canvas:document.getElementById("main-display"),
+	cContext:document.getElementById('main-display').getContext('2d'),
 	hexify:function(pixelX,pixelY)
 	{// I created this function to tell which hex the player has clicked on
 		var map=
 		{
-			x:pixelX/(this.hexWidth*3/4),
-			y:pixelY/this.hexHeight
+			x:(pixelX-(pixelX%(base.hexWidth*3/4)))/(base.hexWidth*3/4),
+			y:null,
 		}
-		if(pixelX%(map.x)<(this.hexWidth/4))
+		if(map.x%2===1)
+			pixelY-=(base.hexHeight/2);
+		map.y=(pixelY-(pixelY%base.hexHeight))/base.hexHeight
+		console.log(pixelY);
+		console.log(map.y);
+		if(pixelX%(base.hexWidth)<(base.hexWidth/4))
 		{
-			if(map.x%2==0)
+			if((pixelY%base.hexHeight)<base.hexHeight/2)
 			{
-				if((pixelY%this.hexHeight)<this.hexHeight/2)
+				if(((pixelY%base.hexHeight)+(pixelX%base.hexWidth)*base.hexRatio)<base.intercept)
 				{
-					if(((pixelX%this.hexHeight)*this.hexRatio+(pixelY%this.hexWidth))<this.topEnd)
-					{
-						map.x-=1;
-					}
-				}
-				else
-				{
-					if(((pixelX%this.hexHeight)*this.hexRatio-(pixelY%this.hexWidth))<this.topEnd)
-					{
-						map.x-=1;
-					}
+					if(map.x===0)
+						map.y--;
+					map.x--;
 				}
 			}
 			else
 			{
-				if((pixelY%this.hexHeight)<this.hexHeight/2)
+				if(((pixelY%base.hexHeight)-(pixelX%base.hexWidth)*base.hexRatio)>base.intercept)
 				{
-					if(((pixelX%this.hexHeight)*this.hexRatio-(pixelY%this.hexWidth))<this.topEnd)
-					{
-						map.x-=1;
-					}
-				}
-				else
-				{
-					if(((pixelX%this.hexHeight)*this.hexRatio+(pixelY%this.hexWidth))<this.topEnd)
-					{
-						map.x-=1;
-					}
+					if(map.x===1)
+						map.y++;
+					map.x--;
 				}
 			}
 		}
-		else
-		{
-		}
-			if(map.x%2==1)
-			{
-				if((pixelY%this.hexHeight)<this.hexHeight/2)
-				{
-					map.y-=1;
-				}
-			}
+		console.log(map.x);
+		return map;
 	},
 	getHex: function(squareX,squareY)
 	{
@@ -220,29 +203,29 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
-							this.background.addEventListener('load', base.canvasID.drawImage(this.background, this.pixelX, this.pixelY));
-							base.canvasID.drawImage(this.background, this.pixelX, this.pixelY);
+							this.background.addEventListener('load', base.cContext.drawImage(this.background, this.pixelX, this.pixelY));
+							base.cContext.drawImage(this.background, this.pixelX, this.pixelY);
 						}
 						if(this.seeShip&&this.shipImage!=null)
 						{
-							base.canvasID.drawImage(this.shipImage, this.pixelX, this.pixelY);
+							base.cContext.drawImage(this.shipImage, this.pixelX, this.pixelY);
 						}
 						if(this.seeRoom&&this.compImage!=null)
 						{
-							base.canvasID.drawImage(this.compImage, this.pixelX, this.pixelY);
+							base.cContext.drawImage(this.compImage, this.pixelX, this.pixelY);
 							//probably should check the comp here
 						}
 						if(this.seeEnergy&&this.energyImage!=null)
 						{
-							base.canvasID.drawImage(this.energyImage, this.pixelX, this.pixelY);
+							base.cContext.drawImage(this.energyImage, this.pixelX, this.pixelY);
 						}
 						if(this.seeShield&&this.shieldImage!=null)
 						{
-							base.canvasID.drawImage(this.ShieldImage, this.pixelX, this.pixelY);
+							base.cContext.drawImage(this.ShieldImage, this.pixelX, this.pixelY);
 						}
 						for(var z=0; z<this.targets.length; z++)
 						{
-							base.canvasID.drawImage(this.targets[z],this.pixleX, this.pixelY);
+							base.cContext.drawImage(this.targets[z],this.pixleX, this.pixelY);
 						}
 					},
 					getDistance: function(otherX,otherY)
@@ -286,11 +269,16 @@ var base=
 	},
 	canvasClicked:function(event)
 	{
-		var windowX=event.clientX;
-		var windowY=event.clientY;
-		alert(""+windowX+" "+windowY);
-		console.log(hexify(windowX-canvasID.clientLeft,windowY-canvasID.clientTop));
-		
+		var windowX=event.pageX;
+		var windowY=event.pageY;
+		console.log($('#main-display').offset().top);
+		console.log(""+(windowX-base.canvas.clientLeft)+" "+(windowY)+' '+event.pageY);
+		console.log(base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top).y);
+		var map=base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top);
+		base.hexes[map.x][map.y].shipImage=base.coursor
+		base.hexes[map.x][map.y].seeShip=true;
+		base.hexes[map.x][map.y].restack();
+		base.cContext.drawImage(base.coursor,0,100);
 	},
 	//most of the component code will be on the server
 	emptyComponent:
@@ -312,19 +300,30 @@ var base=
 		partof:null,//pointer to the ship
 		shipX:null,
 		shipY:null,
+		isSelected:false,
 		isSolid:true,//does the component block other comps don't actually know why I have this but i put it in the code
 		isDestroyed:false,
 	}
 }
 var backgroundImage=new Image();
-base.canvasID.onclick=base.canvasClicked;
+document.getElementById('main-display').onclick=base.canvasClicked;
 backgroundImage.src="images/Space Background.png";
+var coursor=new Image();
+coursor.src="images/tempRoom.png";
+console.log(base.cContext);
+base.cContext.drawImage(coursor,100,100);
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
 	base.restackAll();
-	setTimeout(	base.restackAll(),10000);
+	setTimeout(base.restackAll(),10000);
+	base.coursor=coursor;
+	var event={pageX:100,pageY:100};
+	base.canvasClicked(event);
+	console.log("loaded");
+	console.log(base.cContext);
+	base.cContext.drawImage(coursor,100,0);
 }); //This event will be fired when the image loads.
 
 

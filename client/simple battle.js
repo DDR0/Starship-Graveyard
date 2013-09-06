@@ -11,7 +11,7 @@
 		var battleHeight=20;
 		var backgroundImage=new Image();
 		backgroundImage.src="images/Space Background.png";
-		var canvasID=document.getElementById('grid-display').getContext('2d');
+		var canvasID=document.getElementById('main-display').getContext('2d');
 		//wait until script is loaded please 11
 		var hexes=new Array(battleHeight)
 		{
