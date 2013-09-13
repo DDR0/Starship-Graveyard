@@ -340,7 +340,6 @@ backgroundImage.addEventListener('load',  function()
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
 	base.restackAll();
-	setTimeout(base.restackAll(),10000);
 	base.coursor=coursor;
 	console.log("loaded");
 	console.log(base.cContext);
