@@ -25,11 +25,11 @@ var base=
 		console.log(map.y);
 		if(pixelX%(base.hexWidth)<(base.hexWidth/4))
 		{
-			if((pixelY%base.hexHeight)<base.hexHeight/2)
+			if((pixelY%base.hexHeight)<(base.hexHeight/2))
 			{
 				if(((pixelY%base.hexHeight)+(pixelX%base.hexWidth)*base.hexRatio)<base.intercept)
 				{
-					if(map.x===0)
+					if(map.x%2===0)
 						map.y--;
 					map.x--;
 				}
@@ -38,7 +38,7 @@ var base=
 			{
 				if(((pixelY%base.hexHeight)-(pixelX%base.hexWidth)*base.hexRatio)>base.intercept)
 				{
-					if(map.x===1)
+					if(map.x%2===1)
 						map.y++;
 					map.x--;
 				}
@@ -187,6 +187,7 @@ var base=
 				{
 					coordinateX:x,
 					coordinateY:y,
+					isSelected:false,
 					background:null,
 					shipImage:null,
 					shipPointer:null,
@@ -225,7 +226,11 @@ var base=
 						}
 						for(var z=0; z<this.targets.length; z++)
 						{
-							base.cContext.drawImage(this.targets[z],this.pixleX, this.pixelY);
+							base.cContext.drawImage(this.targets[z],this.pixelX, this.pixelY);
+						}
+						if(this.isSelected)
+						{
+							base.cContext.drawImage(base.coursor,this.pixelX, this.pixelY);
 						}
 					},
 					getDistance: function(otherX,otherY)
@@ -267,6 +272,24 @@ var base=
 		}
 		this.restackAll();
 	},
+	clearSelection:function()//makes all hexes and there rooms unselected
+	{
+		for(var ad=0;ad<base.hexes.length;ad++)
+		{
+			for(var ae=0;ae<base.hexes[ad].length;ae++)
+			{
+				if(base.hexes[ad][ae].isSelected)
+				{
+					base.hexes[ad][ae].isSelected=false;
+					base.hexes[ad][ae].restack();
+					if(base.hexes[ad][ae].compPointer!==null)
+					{
+						base.hexes[ad][ae].compPointer.isSelected=false;
+					}
+				}
+			}
+		}
+	},
 	canvasClicked:function(event)
 	{
 		var windowX=event.pageX;
@@ -275,8 +298,8 @@ var base=
 		console.log(""+(windowX-base.canvas.clientLeft)+" "+(windowY)+' '+event.pageY);
 		console.log(base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top).y);
 		var map=base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top);
-		base.hexes[map.x][map.y].shipImage=base.coursor
-		base.hexes[map.x][map.y].seeShip=true;
+		base.clearSelection();
+		base.hexes[map.x][map.y].isSelected=true;
 		base.hexes[map.x][map.y].restack();
 		base.cContext.drawImage(base.coursor,0,100);
 	},
@@ -306,12 +329,12 @@ var base=
 	}
 }
 var backgroundImage=new Image();
-document.getElementById('main-display').onclick=base.canvasClicked;
 backgroundImage.src="images/Space Background.png";
 var coursor=new Image();
 coursor.src="images/tempRoom.png";
 console.log(base.cContext);
 base.cContext.drawImage(coursor,100,100);
+document.getElementById('main-display').onclick=base.canvasClicked;
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
@@ -319,8 +342,6 @@ backgroundImage.addEventListener('load',  function()
 	base.restackAll();
 	setTimeout(base.restackAll(),10000);
 	base.coursor=coursor;
-	var event={pageX:100,pageY:100};
-	base.canvasClicked(event);
 	console.log("loaded");
 	console.log(base.cContext);
 	base.cContext.drawImage(coursor,100,0);
