@@ -161,16 +161,9 @@ var base=
 					newImages[d][e]=new Image();
 					var src=c[0].toDataURL();
 					srcs[d][e]=src;
-					newImages[d][e].src=src;
+					newImages[d][e]=newPixels;
 					ctx3.putImageData(newPixels,0,0);
 				}
-			}
-		}
-		for(var r=0;r<srcs.length;r++)
-		{
-			for(var s=0;s<srcs[r].length;s++)
-			{
-				newImages[r][s].src=srcs[r][s];
 			}
 		}
 		return newImages;
@@ -204,7 +197,7 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
-							base.cContext.drawImage(this.background, this.pixelX, this.pixelY);
+							base.cContext.putImageData(this.background, this.pixelX, this.pixelY);
 						}
 						if(this.seeShip&&this.shipImage!=null)
 						{
