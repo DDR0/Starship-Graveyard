@@ -204,7 +204,6 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
-							this.background.addEventListener('load', base.cContext.drawImage(this.background, this.pixelX, this.pixelY));
 							base.cContext.drawImage(this.background, this.pixelX, this.pixelY);
 						}
 						if(this.seeShip&&this.shipImage!=null)
@@ -301,6 +300,7 @@ var base=
 		base.clearSelection();
 		base.hexes[map.x][map.y].isSelected=true;
 		base.hexes[map.x][map.y].restack();
+		console.log(base.hexes[map.x][map.y].background.src);
 		base.cContext.drawImage(base.coursor,0,100);
 	},
 	//most of the component code will be on the server
@@ -324,7 +324,7 @@ var base=
 		shipX:null,
 		shipY:null,
 		isSelected:false,
-		isSolid:true,//does the component block other comps don't actually know why I have this but i put it in the code
+		isSolid:true,//does the component block other comps don't actually know why I have this but I put it in the code
 		isDestroyed:false,
 	}
 }
@@ -339,7 +339,6 @@ backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
-	base.restackAll();
 	base.coursor=coursor;
 	console.log("loaded");
 	console.log(base.cContext);
