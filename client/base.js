@@ -93,11 +93,9 @@ var base=
 		var newImageY;
 		var empty;
 		var newImages=Array(imagesWidth);
-		var srcs=Array(imagesWidth);
 		for(var q=0;q<newImages.length;q++)
 		{
 			newImages[q]=new Array(imagesHeight);
-			srcs[q]=new Array(imagesHeight);
 		}
 		ctx2.drawImage(oldImage,0,0);
 		var pixels=ctx2.getImageData(0,0,ctx2.canvas.width,ctx2.canvas.height);
@@ -107,6 +105,7 @@ var base=
 			left=d*this.hexWidth*3/4;
 			for(var e=0;e<newImages[d].length;e++)
 			{
+				newPixels=ctx3.createImageData(newPixels);
 				top=this.hexHeight*e;
 				if(d%2==1)
 				{
@@ -134,8 +133,10 @@ var base=
 					if(((newImageX+left)>=pixels.width)||((newImageY+top)>=pixels.height))
 					{
 						//we dont want to get pixels form outside the image
-						newPixels.data[index+1]=200;
-						newPixels.data[index+3]=250;
+						newPixels.data[index]=0
+						newPixels.data[index+1]=0;
+						newPixels.data[index+2]=0;
+						newPixels.data[index+3]=0;
 					}
 					else if((newImageX*this.hexRatio+newImageY>=this.intercept)&&(newImageX*this.hexRatio+newImageY<=5*this.intercept)&&(newImageX*this.hexRatio-(newImageY)<=3*this.intercept)&&(newImageX*this.hexRatio-newImageY>=-this.intercept))//talk to Jarvis if this doesn’t quite work
 					{
@@ -147,6 +148,9 @@ var base=
 					}
 					else
 					{
+						newPixels.data[index]=0;
+						newPixels.data[index+1]=0;
+						newPixels.data[index+2]=0;
 						newPixels.data[index+3]=0;
 					}
 					if(newPixels.data[index+3]!=0)
@@ -155,14 +159,13 @@ var base=
 						empty=false;
 					}
 				}
-				ctx3.putImageData(newPixels,0,0);//may not work depending on how the pointers work
 				if(!empty)
 				{
-					newImages[d][e]=new Image();
-					var src=c[0].toDataURL();
-					srcs[d][e]=src;
 					newImages[d][e]=newPixels;
-					ctx3.putImageData(newPixels,0,0);
+				}
+				else
+				{
+					newImages[d][e]=null;
 				}
 			}
 		}
