@@ -161,7 +161,9 @@ var base=
 				}
 				if(!empty)
 				{
-					newImages[d][e]=newPixels;
+					ctx3.putImageData(newPixels,0,0);
+					newImages[d][e]=new Image();
+					newImages[d][e].src=c[0].toDataURL();
 				}
 				else
 				{
@@ -200,7 +202,14 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
-							base.cContext.putImageData(this.background, this.pixelX, this.pixelY);
+							var pixelX=this.pixelX;
+							var pixelY=this.pixelY;
+							if(!this.background.completed)
+								this.background.onload=function() {
+									base.cContext.drawImage(this, pixelX,pixelY);
+								};
+							else
+								base.cContext.putImageData(this.background, this.pixelX, this.pixelY);
 						}
 						if(this.seeShip&&this.shipImage!=null)
 						{
@@ -299,6 +308,7 @@ var base=
 		console.log(base.hexes[map.x][map.y].background.src);
 		base.cContext.drawImage(base.coursor,0,100);
 	},
+	
 	//most of the component code will be on the server
 	emptyComponent:
 	{
