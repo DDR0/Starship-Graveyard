@@ -202,14 +202,19 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
+							console.log('restack');
+							console.log(this.background.complete);
 							var pixelX=this.pixelX;
 							var pixelY=this.pixelY;
-							if(!this.background.completed)
+							if(!this.background.complete)
 								this.background.onload=function() {
 									base.cContext.drawImage(this, pixelX,pixelY);
 								};
 							else
-								base.cContext.putImageData(this.background, this.pixelX, this.pixelY);
+							{
+								console.log('background is loaded at ')
+								base.cContext.drawImage(this.background, this.pixelX, this.pixelY);
+							}
 						}
 						if(this.seeShip&&this.shipImage!=null)
 						{
@@ -298,14 +303,17 @@ var base=
 	{
 		var windowX=event.pageX;
 		var windowY=event.pageY;
-		console.log($('#main-display').offset().top);
-		console.log(""+(windowX-base.canvas.clientLeft)+" "+(windowY)+' '+event.pageY);
-		console.log(base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top).y);
+		if(false)
+		{
+			console.log($('#main-display').offset().top);
+			console.log(""+(windowX-base.canvas.clientLeft)+" "+(windowY)+' '+event.pageY);
+			console.log(base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top).y);
+			console.log(base.hexes[map.x][map.y].background.src);
+		}
 		var map=base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top);
 		base.clearSelection();
 		base.hexes[map.x][map.y].isSelected=true;
 		base.hexes[map.x][map.y].restack();
-		console.log(base.hexes[map.x][map.y].background.src);
 		base.cContext.drawImage(base.coursor,0,100);
 	},
 	
@@ -337,18 +345,13 @@ var base=
 var backgroundImage=new Image();
 backgroundImage.src="images/Space Background.png";
 var coursor=new Image();
-coursor.src="images/tempRoom.png";
-console.log(base.cContext);
-base.cContext.drawImage(coursor,100,100);
+coursor.src="images/onehex.png";
 document.getElementById('main-display').onclick=base.canvasClicked;
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
 	base.newHexesByImages(images);
 	base.coursor=coursor;
-	console.log("loaded");
-	console.log(base.cContext);
-	base.cContext.drawImage(coursor,100,0);
 }); //This event will be fired when the image loads.
 
 
