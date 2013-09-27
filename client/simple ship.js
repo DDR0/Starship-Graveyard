@@ -247,7 +247,50 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		this.drawImages();
 	},
 }
+function createEngine(index, style, level, mod, durability)
+{
+	var newEngine=new base.emptyComponent();
+	newEgine.base=//the normal stats, what the comp becomes after it is repaired
+	{
+		condition:durability,//how much damage the engine can take
+		distance:level,//how far the ship can go each turn
+		stress:0,//stress is increased the more the engine is worked
+		force:level*10,//how much mass the engine can push 
+		//It should be noted that an engine will still only move a ship only one space a turn even if it can move another ship 10
+		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
+	}
+	newEngine.current=newEngine.base//need to be careful with this
+		newEngine.thrustType=0;//would you like this to be a string?
+		newEngine.target=function(selected)
+		{
+			var succesful=false;
+			if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
+			{
+				this.selected=selected;
+				succesful=true;
+				location.targets.push(pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines 
+				//add move action to plan
+			}
+			return succesful;
+		}
+		newEngine.clearTarget=function()
+		{
+			//remove move action plan
+			//clear target
+		}
+		switch(index)
+		case 2//give a little room for 
+		{
+			newEngine.name=”NR Engine 2.0"
+			newEngine.generatePower()
+			{
+				//clear target
+				//add generating power to plan
+			}
+		}
+	}
+}
 function()
 {
-		
+	
 }
