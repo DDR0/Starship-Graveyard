@@ -69,4 +69,15 @@ var actions=
 		this.updateButtons();
 	},
 };
+var plan={
+	crewAssists:[],//special abilities and other things that improve comps 
+	power:[],//I think this will be calculated in 
+	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers
+	engines:[],//the actions that move the ship
+	utilities:[],//activating shields, life support ...
+	crewMoves:[],//the little guys running around
+	crewFight:[],//and they can fight
+	slowWeapons:[],//all other weapons
+	
+}
 actions.prepare();

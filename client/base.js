@@ -49,7 +49,7 @@ var base=
 	},
 	getHex: function(squareX,squareY)
 	{
-		var hex={x:0,y:0,z:0,}
+		var hex={x,y,z}
 		hex.x=squareX;
 		hex.y=(squareX+squareY-((squareX-(squareX%2))/2))/2;//should be enough brackets
 		hex.z=squareY-squareX-((squareX+1-((squareX+1)%2))/2);//75% sure this is the right formula
@@ -57,7 +57,7 @@ var base=
 	},
 	getSquare: function(hexX,hexY,hexZ)
 	{
-		var square={x:0,y:0,}
+		var square={x,y}
 		square.x=hexX;
 		square.y=hexZ+hexY-((hexY+1-((hexY+1)%2))/2);//ill check these later
 		return square;
@@ -244,10 +244,44 @@ var base=
 					},
 					getDistance: function(otherX,otherY)
 					{
-						otherHex=getHex(otherX,otherY)
-						thisHex=getHex(this.coordinateX,this.coordinateY)
-						var distance=math.max(math.abs(thisHex.x-otherHex.y),math.abs(thisHex.y-otherHex.y),math.abs(thisHex.z-otherHex.y));
+						var otherHex=base.getHex(otherX,otherY)
+						var thisHex=base.getHex(this.coordinateX,this.coordinateY)
+						var distance=math.max(math.abs(thisHex.x-otherHex.x),math.abs(thisHex.y-otherHex.y),math.abs(thisHex.z-otherHex.z));
 						return distance;
+					}
+					getDirection: function(otherX,otherY)
+					{
+						var clockwise=6;
+						var otherHex=base.getHex(otherX,otherY)
+						var thisHex=base.getHex(this.coordinateX,this.coordinateY)
+						var relativeX=thisHex.x-otherHex.x;
+						var relativeY=thisHex.y-otherHex.y;
+						var relativeZ=thisHex.z-otherHex.z;
+						if(1===math.max(math.abs(relativeX),math.abs(relativeY),math.abs(relativeZ)))
+						{
+							if(relativeX===0)
+							{
+								if(relativeY<0)
+									clockwise=0;
+								else
+									clockwise=3;
+							}
+							else if(relativeY===0)
+							{
+								if(relativeX>0)
+									clockwise=1;
+								else
+									clockwise=4;
+							}
+							else if(relativeZ===0)
+							{
+								if(relativeX>0)
+									clockwise=2;
+								else
+									clockwise=5;
+							}
+						}
+						return clockwise;
 					}
 				}
 			}

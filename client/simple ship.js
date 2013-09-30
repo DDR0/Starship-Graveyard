@@ -260,33 +260,42 @@ function createEngine(index, style, level, mod, durability)
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
 	newEngine.current=newEngine.base//need to be careful with this
-		newEngine.thrustType=0;//would you like this to be a string?
-		newEngine.target=function(selected)
+	newEngine.thrustType=0;//would you like this to be a string?
+	newEngine.target=function(selected)
+	{
+		var succesful=false;
+		if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
 		{
-			var succesful=false;
-			if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
-			{
-				this.selected=selected;
-				succesful=true;
-				location.targets.push(pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines 
-				//add move action to plan
-			}
-			return succesful;
+			this.selected=selected;
+			succesful=true;
+			this.imagePointer=pictures.arrow[0][getDirection(selected);//pictures will have several generic engines
+			location.targets.push(imagePointer]; 
+			var relativeX=selected.coordinateX-this.coordinateX;
+			var relativeY=selected.coordinateY-this.coordinateY;
+			this.moveFunction=function() {
+				partof.teleport(relativeX,relativeY);
+			};
+			plan.engines.push(this.moveFunction);
 		}
-		newEngine.clearTarget=function()
+		return succesful;
+	}
+	newEngine.clearTarget=function()
+	{
+		var index=location.targets.indexOf(this.imagePointer);
+		if(index!=-1)//-1 means its already gone
+			location.targets.splice(index,1);
+		index=plan.engine.indexOf(moveFunction);
+		if(index!=-1)
+			plan.engine.splice(indes,1);
+	}
+	switch(index)
+	case 2//give a little room for other engine variants
+	{
+		newEngine.name=”NR Engine 2.0"
+		newEngine.generatePower()//instead of moving the ship the energy can be focused inward to generate power
 		{
-			//remove move action plan
-			//clear target
-		}
-		switch(index)
-		case 2//give a little room for 
-		{
-			newEngine.name=”NR Engine 2.0"
-			newEngine.generatePower()
-			{
-				//clear target
-				//add generating power to plan
-			}
+			this.clearTarget();
+			this.partof.drain(-1*this.current.force);//negative because it adds power
 		}
 	}
 }
