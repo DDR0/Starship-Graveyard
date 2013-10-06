@@ -260,7 +260,7 @@ function createEngine(index, style, level, mod, durability)
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
 	newEngine.current=newEngine.base//need to be careful with this
-	newEngine.thrustType=0;//would you like this to be a string?
+	newEngine.thrustType=style;//would you like this to be a string?
 	newEngine.target=function(selected)
 	{
 		var succesful=false;
@@ -274,6 +274,17 @@ function createEngine(index, style, level, mod, durability)
 			var relativeY=selected.coordinateY-this.coordinateY;
 			this.moveFunction=function() {
 				partof.teleport(relativeX,relativeY);
+				if(newEngine.attribute.selfBalance)
+				{
+					if(this.current.force<this.base.force)
+					{//this is to correct ion damage but I may need to improve how corrections are done
+						this.current.force++;
+					}
+					if(this.current.distance<this.base.distance)
+					{
+						this.current.distance++;
+					}
+				}
 			};
 			plan.engines.push(this.moveFunction);
 		}
@@ -283,20 +294,46 @@ function createEngine(index, style, level, mod, durability)
 	{
 		var index=location.targets.indexOf(this.imagePointer);
 		if(index!=-1)//-1 means its already gone
-			location.targets.splice(index,1);
+			if(location.targets.[index-1].comp===this)
+				location.targets.splice(index,1);
 		index=plan.engine.indexOf(moveFunction);
 		if(index!=-1)
 			plan.engine.splice(indes,1);
+	}
+	newEngine.doRadDamage=function(damageArray)
+	{//comps for the most part will be immune to radiation
+		for(var ad=0;ad<crew.length;ad++)
+		{
+			this.crew[ad].doDamage('elect',damageArray[ac]);
+		}
+	}
+	newEngine.doElectDamage=function(damageArray)//this will only exist on the server version of the comp
+	{
+		if(electBalance>0)//if it is >0 it means electricity is conducted easily
+		{
+			//need to finish this bit
+		}
+		for(var ac=0;ac<damageArray.length;ac++)
+		{
+			this.current.condition-=math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
+			this.current.force-=math.abs(damageArray[ac]);
+			if(math.abs(damageArray[ac])>10))
+			{
+				this.current.distance-=1;
+			}
+		}
 	}
 	switch(index)
 	case 2//give a little room for other engine variants
 	{
 		newEngine.name=”NR Engine 2.0"
+		newEngine.cleartarget()
 		newEngine.generatePower()//instead of moving the ship the energy can be focused inward to generate power
 		{
 			this.clearTarget();
 			this.partof.drain(-1*this.current.force);//negative because it adds power
 		}
+		
 	}
 }
 function()
