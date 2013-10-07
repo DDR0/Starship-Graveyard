@@ -49,7 +49,7 @@ var base=
 	},
 	getHex: function(squareX,squareY)
 	{
-		var hex={x,y,z}
+		var hex;
 		hex.x=squareX;
 		hex.y=(squareX+squareY-((squareX-(squareX%2))/2))/2;//should be enough brackets
 		hex.z=squareY-squareX-((squareX+1-((squareX+1)%2))/2);//75% sure this is the right formula
@@ -57,7 +57,7 @@ var base=
 	},
 	getSquare: function(hexX,hexY,hexZ)
 	{
-		var square={x,y}
+		var square;
 		square.x=hexX;
 		square.y=hexZ+hexY-((hexY+1-((hexY+1)%2))/2);//ill check these later
 		return square;
@@ -248,8 +248,8 @@ var base=
 						var thisHex=base.getHex(this.coordinateX,this.coordinateY)
 						var distance=math.max(math.abs(thisHex.x-otherHex.x),math.abs(thisHex.y-otherHex.y),math.abs(thisHex.z-otherHex.z));
 						return distance;
-					}
-					getDirection: function(otherX,otherY)
+					},
+					getDirection:function(otherX,otherY)
 					{
 						var clockwise=6;
 						var otherHex=base.getHex(otherX,otherY)
@@ -350,32 +350,31 @@ var base=
 		base.hexes[map.x][map.y].restack();
 		base.cContext.drawImage(base.coursor,0,100);
 	},
-	
 	//most of the component code will be on the server
-	emptyComponent:
+	emptyComponent:function()
 	{
 		//I don't know how many of these are going to be on the server, client or both
 		//Let really want to handle base current and attributes you can handle the others if you want
-		this.base=null,//the base stats that are returned to when the component is repaired includes max health
-		this.current=null,//the current stats that are effected by the battle includes current health
-		this.server=null,//a list of methods that will ONLY be on the server 
-		this.attribute=null,//will be a map of booleans stating whether or not the ship has an attribute
-		this.material=null,//the material or armoUr the component is made out of
-		this.enviroment=null,//a map with the temp gases and other environmental information
-		this.actionList=[],
-		this.isSelected=false,
-		this.crew=null,//an array of all crew in the component
-		this.name=null,
-		this.desctiption=null,
-		this.isSelected=false,
-		this.isSolid=true,//does the component block other comps don't actually know why I have this but I put it in the code
-		this.isDestroyed=false,
-		this.image=null,//the image or icon of the comp
-		this.location=null,//pointer to a hex
-		this.partof=null,//pointer to the ship
-		this.shipX=null,
-		this.shipY=null,
-	}
+		this.base=null;//the base stats that are returned to when the component is repaired includes max health
+		this.current=null;//the current stats that are effected by the battle includes current health
+		this.server=null;//a list of methods that will ONLY be on the server 
+		this.attribute=null;//will be a map of booleans stating whether or not the ship has an attribute
+		this.material=null;//the material or armoUr the component is made out of
+		this.enviroment=null;//a map with the temp gases and other environmental information
+		this.actionList=[];
+		this.isSelected=false;
+		this.crew=null;//an array of all crew in the component
+		this.name=null;
+		this.desctiption=null;
+		this.isSelected=false;
+		this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
+		this.isDestroyed=false;
+		this.image=null;//the image or icon of the comp
+		this.location=null;//pointer to a hex
+		this.partof=null;//pointer to the ship
+		this.shipX=null;
+		this.shipY=null;
+	},
 }
 var backgroundImage=new Image();
 backgroundImage.src="images/Space Background.png";

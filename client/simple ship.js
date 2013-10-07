@@ -256,6 +256,7 @@ function createEngine(index, style, level, mod, durability)
 		distance:level,//how far the ship can go each turn
 		stress:0,//stress is increased the more the engine is worked
 		force:level*10,//how much mass the engine can push 
+		energy:level*10,
 		//It should be noted that an engine will still only move a ship only one space a turn even if it can move another ship 10
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
@@ -263,7 +264,9 @@ function createEngine(index, style, level, mod, durability)
 	newEngine.thrustType=style;//would you like this to be a string?
 	newEngine.target=function(selected)
 	{
+		this.partof.clearStorage(this);
 		var succesful=false;
+		if(this.partof.changeStorage('energy',this.current.energy,this));//returns false if there isn't enough energy
 		if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
 		{
 			this.selected=selected;
@@ -290,8 +293,9 @@ function createEngine(index, style, level, mod, durability)
 		}
 		return succesful;
 	}
-	newEngine.clearTarget=function()
+	newEngine.clear()
 	{
+		newEngine.partof.clearStorage(this);
 		var index=location.targets.indexOf(this.imagePointer);
 		if(index!=-1)//-1 means its already gone
 			if(location.targets.[index-1].comp===this)
@@ -299,6 +303,10 @@ function createEngine(index, style, level, mod, durability)
 		index=plan.engine.indexOf(moveFunction);
 		if(index!=-1)
 			plan.engine.splice(indes,1);
+	}
+	newEngine.clearTarget=function()
+	{
+		newEngine.clear();
 	}
 	newEngine.doRadDamage=function(damageArray)
 	{//comps for the most part will be immune to radiation
@@ -326,14 +334,18 @@ function createEngine(index, style, level, mod, durability)
 	switch(index)
 	case 2//give a little room for other engine variants
 	{
+		newEngine.base.power=0;
+		newEngine.current.power=0;
 		newEngine.name=”NR Engine 2.0"
-		newEngine.cleartarget()
-		newEngine.generatePower()//instead of moving the ship the energy can be focused inward to generate power
+		newEngine.beginTurn()//beginTurns are like upkeep in MTG
 		{
-			this.clearTarget();
-			this.partof.drain(-1*this.current.force);//negative because it adds power
+			this.partof.changeStorage('energy',this.current.force,this);
 		}
-		
+		newEngine.cleartarget()//as a default the engine generates energy
+		{
+			this.clear();
+			this.partof.changeStorage('energy',this.current.force,this);//this wont become permanent until the end of the turn
+		}
 	}
 }
 function()
