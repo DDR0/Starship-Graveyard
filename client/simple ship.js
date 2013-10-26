@@ -249,8 +249,13 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 }
 function createEngine(index, style, level, mod, durability)
 {
-	var newEngine=new base.emptyComponent();
-	newEgine.base=//the normal stats, what the comp becomes after it is repaired
+	this.isSelected=false;
+	this.isSelected=false;
+	this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
+	this.isDestroyed=false;
+	this.attributes.heatBalance=true;
+	this.crew=[];
+	this.base=//the normal stats, what the comp becomes after it is repaired
 	{
 		condition:durability,//how much damage the engine can take
 		distance:level,//how far the ship can go each turn
@@ -260,9 +265,9 @@ function createEngine(index, style, level, mod, durability)
 		//It should be noted that an engine will still only move a ship only one space a turn even if it can move another ship 10
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
-	newEngine.current=newEngine.base//need to be careful with this
-	newEngine.thrustType=style;//would you like this to be a string?
-	newEngine.target=function(selected)
+	this.current=this.base//need to be careful with this
+	this.thrustType=style;//would you like this to be a string?
+	this.target=function(selected)
 	{
 		this.partof.clearStorage(this);
 		var succesful=false;
@@ -275,27 +280,39 @@ function createEngine(index, style, level, mod, durability)
 			location.targets.push(imagePointer]; 
 			var relativeX=selected.coordinateX-this.coordinateX;
 			var relativeY=selected.coordinateY-this.coordinateY;
-			this.moveFunction=function() {
+			this.moveFunction.comp=this;
+			this.moveFunction.func=function() {
 				partof.teleport(relativeX,relativeY);
-				if(newEngine.attribute.selfBalance)
+				if(this.comp.attributes.selfPatch)
 				{
-					if(this.current.force<this.base.force)
+					if(this.comp.current.force<this.comp.base.force)
 					{//this is to correct ion damage but I may need to improve how corrections are done
-						this.current.force++;
+						this.comp.current.force++;
 					}
-					if(this.current.distance<this.base.distance)
+					if(this.comp.current.distance<this.comp.base.distance)
 					{
-						this.current.distance++;
+						this.comp.current.distance++;
 					}
+				}
+				if(this.comp.attributes.radCore)
+				{
+					for(var af=0;af<crew.length;af++)
+					{
+						this.comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
+					}
+				}
+				else
+				{
+					this.comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
 				}
 			};
 			plan.engines.push(this.moveFunction);
 		}
 		return succesful;
 	}
-	newEngine.clear()
+	this.clear()
 	{
-		newEngine.partof.clearStorage(this);
+		this.partof.clearStorage(this);
 		var index=location.targets.indexOf(this.imagePointer);
 		if(index!=-1)//-1 means its already gone
 			if(location.targets.[index-1].comp===this)
@@ -304,25 +321,43 @@ function createEngine(index, style, level, mod, durability)
 		if(index!=-1)
 			plan.engine.splice(indes,1);
 	}
-	newEngine.clearTarget=function()
+	this.clearTarget=function()
 	{
-		newEngine.clear();
+		this.clear();
 	}
-	newEngine.doRadDamage=function(damageArray)
+	this.doHeatDamage=function(damageArray)
+	{
+		if(this.attributes.heatBalance>0)//if it is >0 it means electricity is conducted easily
+		{
+			damageArrayu=[math.sum(damagArray)];
+			//need to finish this bit
+		}
+		for(var ag=0;ag<damageArray.length)
+		{
+			this.enviroment.heat(damageArray[ag]);
+			this.current.condition-=math.abs(damageArray[ag]);
+		}
+	}
+	this.doRadDamage=function(damageArray)
 	{//comps for the most part will be immune to radiation
 		for(var ad=0;ad<crew.length;ad++)
 		{
-			this.crew[ad].doDamage('elect',damageArray[ac]);
+			this.crew[ad].doDamage('rad',damageArray);
 		}
 	}
-	newEngine.doElectDamage=function(damageArray)//this will only exist on the server version of the comp
+	this.doElectDamage=function(damageArray)//this will only exist on the server version of the comp
 	{
-		if(electBalance>0)//if it is >0 it means electricity is conducted easily
+		if(this.attributes.electBalance>0)//if it is >0 it means electricity is conducted easily
 		{
+			damageArrayu=[math.sum(damagArray)];
 			//need to finish this bit
 		}
 		for(var ac=0;ac<damageArray.length;ac++)
 		{
+			for(var ah=0;ah<crew.length;ad++)
+			{
+				this.crew[ah].doDamage('rad',damageArray[ac]);
+			}
 			this.current.condition-=math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
 			this.current.force-=math.abs(damageArray[ac]);
 			if(math.abs(damageArray[ac])>10))
@@ -331,20 +366,31 @@ function createEngine(index, style, level, mod, durability)
 			}
 		}
 	}
+	switch(mod)
+	case //this is where the models will be different
+	{
+		
+	}
 	switch(index)
 	case 2//give a little room for other engine variants
 	{
-		newEngine.base.power=0;
-		newEngine.current.power=0;
-		newEngine.name=”NR Engine 2.0"
-		newEngine.beginTurn()//beginTurns are like upkeep in MTG
+		this.attributes.radCore=true;
+		this.base.power=0;
+		this.current.power=0;
+		this.name=”NR Engine 2.0"
+		//add attributes
+		this.beginTurn()//beginTurns are like upkeep in MTG
 		{
 			this.partof.changeStorage('energy',this.current.force,this);
 		}
-		newEngine.cleartarget()//as a default the engine generates energy
+		this.cleartarget()//as a default the engine generates energy
 		{
 			this.clear();
 			this.partof.changeStorage('energy',this.current.force,this);//this wont become permanent until the end of the turn
+			if(this.current.condition<this.base.damage)
+			{
+				//don't know how to do this so it is only on server
+			}
 		}
 	}
 }
