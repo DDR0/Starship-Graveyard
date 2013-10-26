@@ -70,14 +70,13 @@ var actions=
 	},
 };
 var plan={
-	crewAssists:[],//special abilities and other things that improve comps 
-	power:[],//I think this will be calculated in 
-	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers
-	engines:[],//the actions that move the ship
-	utilities:[],//activating shields, life support ...
-	crewMoves:[],//the little guys running around
-	crewFight:[],//and they can fight
-	slowWeapons:[],//all other weapons
-	
+	//check for end turns
+	crewAssists:[],//things that alter the crews abilities this may have an effect on other assists
+	otherAssists:[],//all other effects and utilities
+	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers may include fighting in comps
+	movement:[],//the actions that move the ship or crew
+	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
+	//storage
+	//check for begin turns
 }
 actions.prepare();
