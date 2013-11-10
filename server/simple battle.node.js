@@ -1,9 +1,13 @@
+/* jshint node: true, globalstrict: true, smarttabs: true, strict: true, proto: true */
+
 "use strict";
 //To launch: sudo nodejs hello\ worldode.js
 //Visit hello world.html to run from the browser.
 
-var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1"
+var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 var port = process.env.OPENSHIFT_NODEJS_PORT || "8078";
+var sqlAddr = process.env.OPENSHIFT_MYSQL_DB_HOST;
+var qslPort = process.env.OPENSHIFT_MYSQL_DB_PORT;
 
 var app = require('http').createServer();
 var io = require('socket.io').listen(app);
@@ -15,11 +19,12 @@ var c = console;
 c.log('Listening on port '+port+' at '+addr+'.');
 app.listen(port, addr);
 
+// mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
 
 //--- Logic ---//
 
 var location = function(x,y,rot) {
-	return {x:x||0, y:y||0, rot/*ation*/:rot||0};
+	return {x:x||0, y:y||0, rot:rot||0};
 };
 
 var crew_member = function(name, race, sex, room_index) {return {
@@ -51,9 +56,9 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 		size: 4, /*const*/
 		effects: [], //strs in ['fire', 'breach', 'mould', 'ion']
 		get crew() {var room = this; return ship.crew.filter(function(crew) {return ship.rooms[crew.in_room] === room;});},
-		set crew() {throw new Error('Read-only.');},
-		get visible() {return !!(this.crew.length || ship.get_max('telemetry', 'level'))},
-		set visible() {throw new Error('Read-only.');},
+		set crew(_) {throw new Error('Read-only.');},
+		get visible() {return !!(this.crew.length || ship.get_max('telemetry', 'level'));},
+		set visible(_) {throw new Error('Read-only.');},
 		gravity: 1,
 		atmosphere: { //A pressure of 100 would be 1 atmosphere of pressure here.
 			__proto__: null,
@@ -76,9 +81,9 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 			ammonia:          0.0,
 			temperature:    295.2, //kelvins
 			//TODO: Convert pressure to mapping over the keys, instead of being explicit. Make temperature non-mappable.
-			get pressure() {return (this.nitrogen + this.oxygen + this.argon + this.carbon_dioxide + this.water + this.neon + this.helium + this.methane + this.krypton + this.hydrogen + this.nitrous_oxide + this.carbon_monoxide + this.xenon + this.ozone + this.nitrogen_dioxide + this.iodine + this.ammonia) / 100},
-			set pressure(delta) {this.nitrogen *= delta; this.oxygen *= delta; this.argon *= delta; this.carbon_dioxide *= delta; this.water *= delta; this.neon *= delta; this.helium *= delta; this.methane *= delta; this.krypton *= delta; this.hydrogen *= delta; this.nitrous_oxide *= delta; this.carbon_monoxide *= delta; this.xenon *= delta; this.ozone *= delta; this.nitrogen_dioxide *= delta; this.iodine *= delta; this.ammonia *= delta; this.temperature *= delta/3},
-			percentage_of: function(element) {return this[element]/this['pressure']},
+			get pressure() {return (this.nitrogen + this.oxygen + this.argon + this.carbon_dioxide + this.water + this.neon + this.helium + this.methane + this.krypton + this.hydrogen + this.nitrous_oxide + this.carbon_monoxide + this.xenon + this.ozone + this.nitrogen_dioxide + this.iodine + this.ammonia) / 100;},
+			set pressure(delta) {this.nitrogen *= delta; this.oxygen *= delta; this.argon *= delta; this.carbon_dioxide *= delta; this.water *= delta; this.neon *= delta; this.helium *= delta; this.methane *= delta; this.krypton *= delta; this.hydrogen *= delta; this.nitrous_oxide *= delta; this.carbon_monoxide *= delta; this.xenon *= delta; this.ozone *= delta; this.nitrogen_dioxide *= delta; this.iodine *= delta; this.ammonia *= delta; this.temperature *= delta/3;},
+			percentage_of: function(element) {return this[element]/this['pressure'];},
 		},
 	});
 	
@@ -87,11 +92,11 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 		level: 1,
 		consoles: 1, /*const*/
 		power: 1, //MAKE GETTER based on level?
-		get max_power() {return this.level},
-		set max_power() {throw new Error('Read-only.');},
+		get max_power() {return this.level;},
+		set max_power(_) {throw new Error('Read-only.');},
 		life: 1, //MAKE GETTER based on level?
-		get max_life() {return this.level},
-		set max_life() {throw new Error('Read-only.');},
+		get max_life() {return this.level;},
+		set max_life(_) {throw new Error('Read-only.');},
 	});
 	
 	switch(type) {
@@ -108,8 +113,8 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 				__proto__: base_system, 
 				charge: 1, 
 				shield: 'normal',
-				get max_charge() {return this.level}, 
-				set max_charge() {throw new Error('Read-only.');}, 
+				get max_charge() {return this.level;}, 
+				set max_charge(_) {throw new Error('Read-only.');}, 
 				charge_interval: 120, //MAKE GETTER
 			});
 		case 'engineering':
@@ -124,8 +129,8 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 				__proto__: base_system, 
 				power: 0,
 				max_power: 0, /*const*/
-				get autopilot_skill() {return this.level*0.25}, 
-				set autopilot_skill() {throw new Error('Read-only.');}, 
+				get autopilot_skill() {return this.level*0.25;}, 
+				set autopilot_skill(_) {throw new Error('Read-only.');}, 
 			});
 		case 'medbay':
 			return Object.seal({
@@ -154,8 +159,8 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 			return Object.seal({
 				__proto__: base_system, 
 				consoles: 0,
-				get capacity() {return storageCapicityVSLevel[this.level]}, 
-				set capacity() {throw new Error('Read-only.');}, 
+				get capacity() {return storageCapicityVSLevel[this.level];}, 
+				set capacity(_) {throw new Error('Read-only.');}, 
 			});
 		case 'doors':
 			return Object.seal({
@@ -172,13 +177,13 @@ var ship_room = function(ship, type, name, x, y) { //Add a 'point' type if room 
 			});
 		default:
 			throw new Error('Bad type ('+type+') given for new room.');
-	};
+	}
 };
 
 var team = 0;
 var ship = function() {
 	var ship = {
-		__proto__: new location,
+		__proto__: new location(0,0,0),
 		type: 'prototype', /*const*/
 		name: 'The Ship',
 		hull_integrety: 8,
@@ -202,8 +207,8 @@ var ship = function() {
 	];
 	ship.room_size = {x:6,y:8};
 	Object.defineProperty(ship, "get_rooms", {
-		get: function() {return function(type) {return ship.rooms.filter(function(room) {return room.type === type});};},
-		set: function() {throw new Error('Read-only.');},
+		get: function() {return function(type) {return ship.rooms.filter(function(room) {return room.type === type;});};},
+		set: function(_) {throw new Error('Read-only.');},
 		configurable: false,
 		enumerable: false,
 		//writable: false, //This isn't allowed with get? It complains about a setter. I suspect the node.js defaults aren't to spec, here.
@@ -212,15 +217,15 @@ var ship = function() {
 		var rooms = ship.get_rooms(room_type);
 		switch(rooms.length) {
 			case 0: return 0;
-			case 1: return rooms[0][property]
+			case 1: return rooms[0][property];
 			default: //TODO: This is untested.
-				rooms.forEach(function(a) {if(typeof(a[property]) !== "number") {throw new Error('Room property '+property+' is not a number; is ' + a[property] + '.')}});
-				return rooms.map(function(a) {return a[property]}).reduce(function(a, b) {return Math.max(a + b)});
-		};
+				rooms.forEach(function(a) {if(typeof(a[property]) !== "number") {throw new Error('Room property '+property+' is not a number; is ' + a[property] + '.');}});
+				return rooms.map(function(a) {return a[property];}).reduce(function(a, b) {return Math.max(a + b);});
+		}
 	};
 	Object.defineProperty(ship, "shields", {
-		get: function() {return ship.get_rooms('shields').map(function(room) {return {shield: room.shield, charge: room.charge}});},
-		set: function() {throw new Error('Read-only.');},
+		get: function() {return ship.get_rooms('shields').map(function(room) {return {shield: room.shield, charge: room.charge};});},
+		set: function(_) {throw new Error('Read-only.');},
 		configurable: false,
 		enumerable: false,
 	});
@@ -231,7 +236,7 @@ var ship = function() {
 //--- Events ---//
 
 io.sockets.on('connection', function(socket) {
-	var r = {log: function(data) {socket.emit('print', data)}};
+	var r = {log: function(data) {socket.emit('print', data);}};
 	
 	//Temporary code to set up ships at all. This should probably be read from a DB.
 	var battle = {
@@ -260,7 +265,7 @@ io.sockets.on('connection', function(socket) {
 	
 	
 	socket.on('ping', function() {
-		c.log('req:', 'pinged @ ' + Math.round(new Date().getTime()/1000))
+		c.log('req:', 'pinged @ ' + Math.round(new Date().getTime()/1000));
 		
 		//setTimeout(function() { //For testing! It is, indeed, much worse with two seconds of lag.
 		//	socket.emit('pong');
@@ -289,7 +294,7 @@ io.sockets.on('connection', function(socket) {
 //--- Functions ---//
 
 var make_2d_grid = function(size_x, size_y, initial_value) {
-	return _.range(size_x).map(function() {return _.range(size_y).map(function() {return initial_value||{}})});
+	return _.range(size_x).map(function() {return _.range(size_y).map(function() {return initial_value||{};});});
 };
 
 //--- Functional Functions ---//
@@ -302,68 +307,73 @@ var render_ship = function(s, visiblity_level, reports_to_viewer) { //Ship, visi
 	var set_all_effects = false;
 	switch(visiblity_level) {
 		case 'all': // ['invisible', 'hull', 'rooms', 'crew', 'systems', 'all'])
-		s.rooms.forEach(function(rm) {
-			var vrm = v.rooms[rm.x][rm.y];
-			var interesting_keys = ['effects', 'level', 'life', 'power'];
-			if(reports_to_viewer) {
-				interesting_keys.push('powermap');
-			};
-			interesting_keys.forEach(function(key) {
-				if(key in rm) {
-					vrm[key] = rm[key];
-				};
+			s.rooms.forEach(function(rm) {
+				var vrm = v.rooms[rm.x][rm.y];
+				var interesting_keys = ['effects', 'level', 'life', 'power'];
+				if(reports_to_viewer) {
+					interesting_keys.push('powermap');
+				}
+				interesting_keys.forEach(function(key) {
+					if(key in rm) {
+						vrm[key] = rm[key];
+					}
+				});
+				if('max_charge' in rm) {vrm.maxCharge = rm.max_charge;}
+				vrm.maxLife = rm.max_life;
+				vrm.maxPower = rm.max_power;
 			});
-			if('max_charge' in rm) {vrm.maxCharge = rm.max_charge};
-			vrm.maxLife = rm.max_life;
-			vrm.maxPower = rm.max_power;
-		});
-		set_all_effects = true;
+			set_all_effects = true;
+		break;
 		case 'systems':
-		s.rooms.forEach(function(rm) {
-			var vrm = v.rooms[rm.x][rm.y];
-			var interesting_keys = ['atmosphere', 'bays', 'capacity', 'charge', 'gravity', 'name', 'type'];
-			if(reports_to_viewer) {
-				interesting_keys.push('powermap');
-			};
-			interesting_keys.forEach(function(key) {
-				if(key in rm) {
-					vrm[key] = rm[key];
-				};
+			s.rooms.forEach(function(rm) {
+				var vrm = v.rooms[rm.x][rm.y];
+				var interesting_keys = ['atmosphere', 'bays', 'capacity', 'charge', 'gravity', 'name', 'type'];
+				if(reports_to_viewer) {
+					interesting_keys.push('powermap');
+				}
+				interesting_keys.forEach(function(key) {
+					if(key in rm) {
+						vrm[key] = rm[key];
+					}
+				});
+				vrm.broken = rm.life <= 0;
+				vrm.damaged = rm.life < rm.max_life;
+				if(!set_all_effects && _.contains(rm.effects, 'ion')) { //A breach to space is, logically, visible from said space. Which you are in.
+					vrm.effects = vrm.effects || [];
+					vrm.effects.push('ion');
+				}
 			});
-			vrm.broken = rm.life <= 0;
-			vrm.damaged = rm.life < rm.max_life;
-			if(!set_all_effects && _.contains(rm.effects, 'ion')) { //A breach to space is, logically, visible from said space. Which you are in.
-				vrm.effects = vrm.effects || [];
-				vrm.effects.push('ion');
-			};
-		});
+		break;
 		case 'crew':
-		v.crew = s.crew.map(function(crew) {return render_crew_member(crew);});
-		s.crew.forEach(function(crew, index) {
-			if(crew.in_room && reports_to_viewer) {
-				var rm = s.rooms[crew.in_room];
-				var vcrew = v.rooms[rm.x][rm.y].crew = v.rooms[rm.x][rm.y].crew || [];
-				vcrew.push(index);
-			};
-		});
+			v.crew = s.crew.map(function(crew) {return render_crew_member(crew);});
+			s.crew.forEach(function(crew, index) {
+				if(crew.in_room && reports_to_viewer) {
+					var rm = s.rooms[crew.in_room];
+					var vcrew = v.rooms[rm.x][rm.y].crew = v.rooms[rm.x][rm.y].crew || [];
+					vcrew.push(index);
+				}
+			});
+		break;
 		case 'rooms':
-		s.rooms.forEach(function(rm) {
-			var vrm = v.rooms[rm.x][rm.y];
-			vrm.type = rm.type;
-			vrm.crew = vrm.crew || [];
-			vrm.effects = vrm.effects || [];
-			if(!set_all_effects && _.contains(rm.effects, 'breach')) { //A breach to space is, logically, visible from said space. Which you are in.
-				vrm.effects.push('breach');
-			};
-		});
+			s.rooms.forEach(function(rm) {
+				var vrm = v.rooms[rm.x][rm.y];
+				vrm.type = rm.type;
+				vrm.crew = vrm.crew || [];
+				vrm.effects = vrm.effects || [];
+				if(!set_all_effects && _.contains(rm.effects, 'breach')) { //A breach to space is, logically, visible from said space. Which you are in.
+					vrm.effects.push('breach');
+				}
+			});
+		break;
 		case 'hull':
-		Object.keys(location()).concat(['hull', 'shields', 'name']).forEach(function(key) {v[key] = s[key]});
-		v.hullIntegrety = s.hull_integrety;
-		v.maxHullIntegrety = s.max_hull_integrety;
+			Object.keys(location()).concat(['hull', 'shields', 'name']).forEach(function(key) {v[key] = s[key];});
+			v.hullIntegrety = s.hull_integrety;
+			v.maxHullIntegrety = s.max_hull_integrety;
+		break;
 		case 'invisible':
 		break;
 		default: throw new Error("render_ship doesn't know visibility level '"+visiblity_level+'\'.');
-		};
+		}
 	
 	v.rooms = _.contains(['invisible', 'hull'], visiblity_level) ? [] : v.rooms; //Don't give away the size of the ship!
 	v.crew = v.crew || []; //Ensure crew is a list, as it may not have been set.
