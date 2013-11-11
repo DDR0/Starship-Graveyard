@@ -1,8 +1,6 @@
 /* jshint node: true, globalstrict: true, smarttabs: true, strict: true, proto: true */
 
 "use strict";
-//To launch: sudo nodejs hello\ worldode.js
-//Visit hello world.html to run from the browser.
 
 var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 var port = process.env.OPENSHIFT_NODEJS_PORT || "8078";

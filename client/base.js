@@ -202,8 +202,8 @@ var base=
 					{//updates the graphics for the specified hex
 						if(this.background!=null)
 						{
-							console.log('restack');
-							console.log(this.background.complete);
+							//console.log('restack');
+							//console.log(this.background.complete);
 							var pixelX=this.pixelX;
 							var pixelY=this.pixelY;
 							if(!this.background.complete)
@@ -212,7 +212,7 @@ var base=
 								};
 							else
 							{
-								console.log('background is loaded at ')
+								//console.log('background is loaded at ')
 								base.cContext.drawImage(this.background, this.pixelX, this.pixelY);
 							}
 						}
