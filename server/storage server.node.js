@@ -1,5 +1,4 @@
 /* jshint node: true, globalstrict: true, smarttabs: true, strict: true, proto: true */
-
 "use strict";
 
 var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
