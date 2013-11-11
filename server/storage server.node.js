@@ -14,7 +14,7 @@ io.set('transports', ['websocket']);
 io.set('log level', 2);
 var _ = require('underscore');
 var sql = require('mysql2');
-var dbShips = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', address: sqlAddr, port: sqlPort});
+var dbShips = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', host: sqlAddr, port: sqlPort});
 var c = console;
 
 c.log(sqlAddr, sqlPort);
