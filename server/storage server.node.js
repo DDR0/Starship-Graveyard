@@ -5,7 +5,7 @@
 var addr = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
 var port = process.env.OPENSHIFT_NODEJS_PORT || "8078";
 var sqlAddr = process.env.OPENSHIFT_MYSQL_DB_HOST;
-var qslPort = process.env.OPENSHIFT_MYSQL_DB_PORT;
+var sqlPort = process.env.OPENSHIFT_MYSQL_DB_PORT;
 var USE_DEBUG = !process.env.OPENSHIFT_NODEJS_IP;
 
 var app = require('http').createServer();
@@ -14,12 +14,14 @@ io.set('transports', ['websocket']);
 io.set('log level', 2);
 var _ = require('underscore');
 var sql = require('mysql2');
-var dbShips = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg'});
+var dbShips = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', address: sqlAddr, port: sqlPort});
 var c = console;
+
+c.log(sqlAddr, sqlPort);
 
 var startTime = Math.round(new Date().getTime()/1000);
 
-c.log('Storage Server listening on port '+port+' at '+addr+'.');
+c.log('Storage server listening on port '+addr+':'+port+'. MySQL database connection on '+sqlAddr+':'+sqlPort+'.');
 app.listen(port, addr);
 
 // mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
