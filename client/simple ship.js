@@ -4,10 +4,10 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	centerY:null,
 	mapX:null,//can be negative
 	mapY:null,//can be negative
-	energyComp,null;
+	energyComp:null,
 	comps:[],//both comps and images will become 2D ragged arrays when comps are added
 	images:[],
-	destroyed;[],//destroyed contains an array of images representing the ship full of holes
+	destroyed:[],//destroyed contains an array of images representing the ship full of holes
 	updateCenter:function()
 	{
 		//component 
