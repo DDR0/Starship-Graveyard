@@ -12,7 +12,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	{
 		//component 
 		//updates the centre hex relative to the ship its not super accurate it should really involve squaring sum numbers but it'll work for what we want
-		var hex;
+		var hex=null;
 		var sumX=0;
 		var sumY=0;
 		var sumZ=0;
@@ -41,7 +41,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		centerX=square.x;
 		centerY=square.y;
 	},
-	canGo:function(var newX, var newY)
+	canGo:function(var relativeX, var relativeY)
 	{//sees if the ship can go to the coordinates and still be on the map, doesn't check for collisions 
 		var goable=true
 		for(var f=0;f<comps.length;f++)
@@ -50,7 +50,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 			{
 				if(comps[f][h]!=null)
 				{
-					if(comps[f][h].isSolid)
+					if(comps[f][h].isSolid!==false)
 					{
 						if((comps[f][h].shipX+relativeX+mapX)%2==0)
 						{//would it be unprofessional to just see if hexes[f][h] is defined either way this isn't done
@@ -181,12 +181,17 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		base.hexes[relativeX+mapX][relativeY+mapY].seeRoom=false;
 		base.hexes[relativeX+mapX][relativeY+mapY].restack();
 	},
-	rotate:function(x,y)=
+	rotate:function(direction, isAbsolute)=
 	{
-		this.rotate(x,y);
+		if(isAbsolute)
+		else
+		{
+		}
+		this.rotate(direction,isAbsolute);
 	},
 	translate:function(x,y)=
 	{
+		
 		//checks along the ships path and then teleports the ship
 	},
 	clearImages;function()//should only be used before addImage
@@ -255,6 +260,9 @@ function createEngine(index, style, level, mod, durability)
 	this.isDestroyed=false;
 	this.attributes.heatBalance=true;
 	this.crew=[];
+	this.server=null;//will be set back to null to keep most of the functions on the server
+	this.server.idel=[];
+	this.server.always[];
 	this.base=//the normal stats, what the comp becomes after it is repaired
 	{
 		condition:durability,//how much damage the engine can take
@@ -266,11 +274,37 @@ function createEngine(index, style, level, mod, durability)
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
 	this.current=this.base//need to be careful with this
-	this.thrustType=style;//would you like this to be a string?
+	this.thrustTypes=[style];//would you like this to be a string?
+	this.server.movefuncion=function(){
+		partof.teleport(relativeX,relativeY);
+		if(this.comp.attributes.selfPatch)
+		{
+			if(this.comp.current.force<this.comp.base.force)
+			{//this is to correct ion damage but I may need to improve how corrections are done
+				this.comp.current.force++;
+			}
+			if(this.comp.current.distance<this.comp.base.distance)
+			{
+				this.comp.current.distance++;
+			}
+		}
+		if(this.comp.attributes.radCore)
+		{
+			for(var af=0;af<crew.length;af++)
+			{
+				this.comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
+			}
+		}
+		else
+		{
+			this.comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
+		}
+	};
 	this.target=function(selected)
 	{
 		this.partof.clearStorage(this);
 		var succesful=false;
+		if(
 		if(this.partof.changeStorage('energy',this.current.energy,this));//returns false if there isn't enough energy
 		if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
 		{
@@ -280,32 +314,8 @@ function createEngine(index, style, level, mod, durability)
 			location.targets.push(imagePointer]; 
 			var relativeX=selected.coordinateX-this.coordinateX;
 			var relativeY=selected.coordinateY-this.coordinateY;
-			this.moveFunction.comp=this;
-			this.moveFunction.func=function() {
-				partof.teleport(relativeX,relativeY);
-				if(this.comp.attributes.selfPatch)
-				{
-					if(this.comp.current.force<this.comp.base.force)
-					{//this is to correct ion damage but I may need to improve how corrections are done
-						this.comp.current.force++;
-					}
-					if(this.comp.current.distance<this.comp.base.distance)
-					{
-						this.comp.current.distance++;
-					}
-				}
-				if(this.comp.attributes.radCore)
-				{
-					for(var af=0;af<crew.length;af++)
-					{
-						this.comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
-					}
-				}
-				else
-				{
-					this.comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
-				}
-			};
+			this.moveFunction.comp=this;// need to fix this so it points to the write comp
+			this.moveFunction.func=this.server.movefunction; 
 			plan.engines.push(this.moveFunction);
 		}
 		return succesful;
@@ -317,7 +327,7 @@ function createEngine(index, style, level, mod, durability)
 		if(index!=-1)//-1 means its already gone
 			if(location.targets.[index-1].comp===this)
 				location.targets.splice(index,1);
-		index=plan.engine.indexOf(moveFunction);
+		index=plan.engine.indexOf(this.moveFunction);
 		if(index!=-1)
 			plan.engine.splice(indes,1);
 	}
@@ -329,7 +339,7 @@ function createEngine(index, style, level, mod, durability)
 	{
 		if(this.attributes.heatBalance>0)//if it is >0 it means electricity is conducted easily
 		{
-			damageArrayu=[math.sum(damagArray)];
+			damageArray=[math.sum(damagArray)];
 			//need to finish this bit
 		}
 		for(var ag=0;ag<damageArray.length)
@@ -349,7 +359,7 @@ function createEngine(index, style, level, mod, durability)
 	{
 		if(this.attributes.electBalance>0)//if it is >0 it means electricity is conducted easily
 		{
-			damageArrayu=[math.sum(damagArray)];
+			damageArray=[math.sum(damagArray)];
 			//need to finish this bit
 		}
 		for(var ac=0;ac<damageArray.length;ac++)
@@ -374,6 +384,12 @@ function createEngine(index, style, level, mod, durability)
 	switch(index)
 	case 2//give a little room for other engine variants
 	{
+		if(this.server.idel!==undefined)
+		{
+			this.server.idelForStyle=this.server.idel
+		}
+		this.server.idel=//some function
+		this.server.always=//some function
 		this.attributes.radCore=true;
 		this.base.power=0;
 		this.current.power=0;
@@ -382,6 +398,12 @@ function createEngine(index, style, level, mod, durability)
 		this.beginTurn()//beginTurns are like upkeep in MTG
 		{
 			this.partof.changeStorage('energy',this.current.force,this);
+			if(this.current.condition<this.base.damage)
+			{
+				for(var aj=0;af<this.crew.lenght;aj++)
+					crew[aj].doDamage(rad,this.base.condition-this.current.codition);
+				//don't know how to do this so it is only on server
+			}
 		}
 		this.cleartarget()//as a default the engine generates energy
 		{
@@ -389,6 +411,8 @@ function createEngine(index, style, level, mod, durability)
 			this.partof.changeStorage('energy',this.current.force,this);//this wont become permanent until the end of the turn
 			if(this.current.condition<this.base.damage)
 			{
+				for(var aj=0;af<this.crew.lenght;aj++)
+					crew[aj].doDamage(rad,this.base.condition-this.current.codition);
 				//don't know how to do this so it is only on server
 			}
 		}
