@@ -72,7 +72,7 @@ var actions=
 var plan={
 	//check for end turns
 	crewAssists:[],//things that alter the crews abilities this may have an effect on other assists
-	otherAssists:[],//all other effects and utilities
+	otherAssists:[],//all other effects and utilities includes idels and alwayses
 	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers may include fighting in comps
 	movement:[],//the actions that move the ship or crew
 	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
