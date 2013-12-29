@@ -13,14 +13,12 @@ io.set('transports', ['websocket']);
 io.set('log level', 2);
 var _ = require('underscore');
 var sql = require('mysql2');
-var dbShips = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', host: sqlAddr, port: sqlPort});
-var c = console;
-
-c.log(sqlAddr, sqlPort);
+var db = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', host: sqlAddr, port: sqlPort});
+var c = io.log;
 
 var startTime = Math.round(new Date().getTime()/1000);
 
-c.log('Storage server listening on port '+addr+':'+port+'. MySQL database connection on '+sqlAddr+':'+sqlPort+'.');
+c.info('Server listening at '+addr+':'+port+', using '+(USE_DEBUG?'local MySQL database.':'MySQL database connection at '+sqlAddr+':'+sqlPort+'.'));
 app.listen(port, addr);
 
 // mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
@@ -38,8 +36,9 @@ io.sockets.on('connection', function(socket) {
 	
 	var on = function(event_name, callback) {
 		socket.on(event_name, function(event_data) {
-			console.log('   event - ' + event_name + ' @ ' + startTime + ' + ' + (Math.round(new Date().getTime()/1000) - startTime) );
-			USE_DEBUG ? setTimeout(callback, Math.random()*2000, event_data) : callback(event_data);
+			c.info('   event - ' + event_name + ' @ ' + startTime + ' + ' + (Math.round(new Date().getTime()/1000) - startTime) );
+			//USE_DEBUG ? setTimeout(callback, Math.random()*2000, event_data) : callback(event_data); //Could serve requests out of order, is this OK?
+			callback(event_data);
 		});
 	};
 	
