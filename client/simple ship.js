@@ -5,9 +5,9 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	mapX:null,//can be negative
 	mapY:null,//can be negative
 	energyComp:null,
-	comps:[],//both comps and images will become 2D ragged arrays when comps are added
-	images:[],
-	destroyed:[],//destroyed contains an array of images representing the ship full of holes
+	comps:[[]],//both comps and images will become 2D ragged arrays when comps are added
+	images:[[]],
+	destroyed:[[]],//destroyed contains an array of images representing the ship full of holes
 	updateCenter:function()
 	{
 		//component 
@@ -23,7 +23,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 			{
 				if(comps[x][y]!=null)
 				{
-					if(comps[x][y].isSolid
+					if(comps[x][y].isSolid)
 					{
 						hex=base.getHex(x,y);
 						sumX+=hex.x;
@@ -34,14 +34,14 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 				}
 			}
 		}
-		sumX=math.round(sumX/numOfComps);
-		sumY=math.round(sumY/numOfComps);
-		sumZ=math.round(sumZ/numOfComps);
+		sumX=Math.round(sumX/numOfComps);
+		sumY=Math.round(sumY/numOfComps);
+		sumZ=Math.round(sumZ/numOfComps);
 		square=getSquare(sumX,sumY,sumZ);
 		centerX=square.x;
 		centerY=square.y;
 	},
-	canGo:function(var relativeX, var relativeY)
+	canGo:function(relativeX,relativeY)
 	{//sees if the ship can go to the coordinates and still be on the map, doesn't check for collisions 
 		var goable=true
 		for(var f=0;f<comps.length;f++)
@@ -54,7 +54,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 					{
 						if((comps[f][h].shipX+relativeX+mapX)%2==0)
 						{//would it be unprofessional to just see if hexes[f][h] is defined either way this isn't done
-							goable=goable&&((comps[f][h].shipX+relativeX+shipX)<base.battleWidth)&&((comps[f][h].shipY+relativeY);
+							goable=(goable&&((comps[f][h].shipX+relativeX+shipX)<base.battleWidth)&&((comps[f][h].shipY+relativeY)));
 						}
 						else
 						{
@@ -84,63 +84,70 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 			relativeY=0;
 			newArrays=true;
 		}
-		if(relativeX>=comps.length)
+		if(relativeX>=this.comps.length)
 		{
 			newArrays=true;
 		}
-		else if(relativeY>=comps[relativeX].length)
+		else if(relativeY>=this.comps[relativeX].length)
 		{
 			newArrays=true;
 		}
 		if(newArrays)
 		{
-			var newComps=new array(math.max(comps.length+displaceX,relativeX+1));
-			var newImages=new array(newComps.length-comps.length+images.length);
-			var newDestroyed=new array(newImages.length-images.length+destroyed.length);
+			var newComps=new Array(Math.max(this.comps.length+displaceX,relativeX+1));
+			var newImages=new Array(newComps.length-this.comps.length+this.images.length);
+			var newDestroyed=new Array(newImages.length-this.images.length+this.destroyed.length);
 			for(var b=displaceX;b<newComps.length;b++)
 			{
 				if(b===relativeX)
-				{
-					newComps[b]=new array(math.max(comps[b].length+displaceY,relativeY+1));
-					newImages[b]=new array(newComps[b].length-comps.length[b]+images.length[b]);
-					newDestroyed[b]=new array(newImages[b].length-comps.length[b]+images.length[b]);
-					for(var c=displaceY;c<newComps[b].length;b++)
+				{//need to fix this so it handles undefined arrays proper
+					newComps[b]=new Array(Math.max(this.comps[b-displaceX].length+displaceY,relativeY+1));
+					newImages[b]=new Array(newComps[b].length-this.comps[b].length+this.images[b].length);//just incase we want different sized array who knows
+					newDestroyed[b]=new Array(newComps[b].length-this.comps[b].length+this.destroyed[b].length);
+					for(var c=0;c<this.comps[b].length;b++)
 					{
-						newComps[b][c]=comps[b-displaceX][c-displaceY];
-						newComps[b][c].shipX=b;
-						newComps[b][c].shipY=c;
-						newImages[b][c]=images[b-displaceX][c-displaceY];
-						newDestroyed[b][c]=destroyed[b-displaceX][c-displaceY];
+						newComps[b+displaceX][c+displaceY]=this.comps[b][c];
+						newComps[b+displaceX][c+displaceY].shipX=b;
+						newComps[b+displaceX][c+displaceY].shipY=c;
+						newImages[b+displaceX][c+displaceY]=this.images[b-displaceX][c-displaceY];
+						newDestroyed[b+displaceX][c+displaceY]=this.destroyed[b-displaceX][c-displaceY];
 					}
 				}
 				else
 				{
-					newComps[b]=comps[b-displaceX];
+					newComps[b]=this.comps[b-displaceX];
 					for(var ab=0;ab<newComps[b].length;ab++)
 					{
 						newComps[b][ab].shipX=b;
 					}
-					newImages[b]=images[b-displaceX];
-					newDestroyed[b]=images[b-displaceX];
+					newImages[b]=this.images[b-displaceX];
+					newDestroyed[b]=this.images[b-displaceX];
 				}
 			}
+			//if(array undefined
 			if(relativeX<displaceX)
 			{
 				newComps[relativeX]=new Array(relativeY+1);
 				newImages[relativeX]=new Array(relativeY+1);
 				newDestroyed[relativeX]=new Array(relativeY+1);
 			}
-			images=newImages;
-			comps=newComps;
-			destroyed=newDsstroyed
+			this.images=newImages;
+			this.comps=newComps;
+			this.destroyed=newDestroyed
 		}
-		comps[relativeX][relativeY]=newComponent;
+		this.comps[relativeX][relativeY]=newComponent;
 		newComponent.shipX=relativeX;
 		newComponent.shipY=relativeY;
-		images[relatvieX][relativeY]=//need to figure out where the ship images come from
-		destroyed[relativeX][relativeY]=
+		base.hexes[this.mapX+relativeX][this.mapX+relativeY].compPointer=newComponent;
+		console.log(base.hexes[this.mapX+relativeX][this.mapX+relativeY]);
+		newComponent.partof=mainShip;
+		if(false)
+		{
+			this.images[relatvieX][relativeY]=this//need to figure out where the ship images come from
+			this.destroyed[relativeX][relativeY]=this
+		}
 	},
-	moveComponent:function(component, relativeX, relativeY)=
+	moveComponent:function(component, relativeX, relativeY)
 	{
 		var ok=true;
 		if(relativeX+component.shipX<0||relativeX+component.shipX>comps.length)
@@ -164,7 +171,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		}
 		return ok;
 	},
-	removeComponent:function(relativeX, relativeY)=
+	removeComponent:function(relativeX, relativeY)
 	{
 		//removes the component from the ship but doesn't destroy the component
 		//should not be called when destroying a room
@@ -181,20 +188,22 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		base.hexes[relativeX+mapX][relativeY+mapY].seeRoom=false;
 		base.hexes[relativeX+mapX][relativeY+mapY].restack();
 	},
-	rotate:function(direction, isAbsolute)=
+	rotate:function(direction, isAbsolute)
 	{
 		if(isAbsolute)
+		{
+		}
 		else
 		{
 		}
 		this.rotate(direction,isAbsolute);
 	},
-	translate:function(x,y)=
+	translate:function(x,y)
 	{
 		
 		//checks along the ships path and then teleports the ship
 	},
-	clearImages;function()//should only be used before addImage
+	clearImages:function()//should only be used before addImage
 	{
 		for(var t=0;t<images.length;t++)
 		{
@@ -212,13 +221,13 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 			}
 		}
 	},
-	drawImages;function()
+	drawImages:function()
 	{
 		for(var z=0;z<images.length;z++)
 		{
 			for(var aa=0;aa<images.lenght;aa++)
 			{
-				if(comp[z][aa].isDestroyed
+				if(comp[z][aa].isDestroyed)
 					base.hexes[mapX+z][mapY+aa].shipImage=destoyed[z][aa];
 				else
 					base.hexes[mapX+z][mapY+aa].shipImage=images[z][aa];
@@ -232,8 +241,8 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 				base.hexes[mapX+z][mapY+aa].restack();
 			}
 		}
-	}
-	teleport:function(relativeX,relativeY)=
+	},
+	teleport:function(relativeX,relativeY)
 	{
 		this.clearImages();
 		this.mapX+=relativeX;
@@ -251,54 +260,71 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		}
 		this.drawImages();
 	},
+	checkStorage:function()
+	{
+		return true;
+	},
+	changeStorage:function()
+	{
+	},
+	finalizeStorage:function()
+	{
+	},
 }
-	this.server.moveFunctions.push(tempmovefunctions);
-	tempMoveFuncion=function(){
-		partof.teleport(relativeX,relativeY);
-		if(this.comp.attributes.selfPatch)
+var simpleFunctions=
+{
+	move:function(comp,ship,relativeX,relativeY)
+	{
+		ship.teleport(relativeX,relativeY);//change this when translate and collisions 
+		if(comp.attributes.selfPatch)
 		{
-			if(this.comp.current.force<this.comp.base.force)
+			if(comp.current.force<this.comp.base.force)
 			{//this is to correct ion damage but I may need to improve how corrections are done
-				this.comp.current.force++;
+				comp.current.force++;
 			}
-			if(this.comp.current.distance<this.comp.base.distance)
+			if(comp.current.distance<this.comp.base.distance)
 			{
-				this.comp.current.distance++;
+				comp.current.distance++;
 			}
 		}
-		if(this.comp.attributes.radCore)
+		if(comp.attributes.radCore)
 		{
 			for(var af=0;af<crew.length;af++)
 			{
-				this.comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
+				comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
 			}
 		}
 		else
 		{
-			this.comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
+			comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
 		}
-	};
-	this.server.moveFunctions=[];
-	this.server.moveFunctions.push(tempMoveFunctions);
+	}
+};
 function createEngine(index, style, level, mod, durability)
 {
+	compForCompPurposes=this;
 	this.isSelected=false;
 	this.isSelected=false;
 	this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
 	this.isDestroyed=false;
-	this.attributes.heatBalance=true;
+	this.attributes=
+	{
+		heatBalance:true,
+	};
 	this.crew=[];
-	this.server=null;//will be set back to null to keep most of the functions on the server
-	this.server.idel=[];
-	this.server.always[];
-	this.server.afterIdel[];
-	this.server.afterAlways[];
-	this.server.afterMove[];
-	this.server.afterAction[];
+	this.server=
+	{
+		idel:[],
+		always:[],
+		afterIdel:[],
+		afterAlways:[],
+		afterMove:[],
+		afterAction:[],
+	}//will be set back to null to keep most of the functions on the server
 	this.base=//the normal stats, what the comp becomes after it is repaired
 	{
 		condition:durability,//how much damage the engine can take before it is nolonge there
-		funcional:durablity,//how much damage before the engine is completely useless
+		funcional:durability,//how much damage before the engine is completely useless
 		distance:level,//how far the ship can go each turn
 		stress:0,//stress is increased the more the engine is worked
 		force:level*10,//how much mass the engine can push 
@@ -306,44 +332,77 @@ function createEngine(index, style, level, mod, durability)
 		//It should be noted that an engine will still only move a ship only one space a turn even if it can move another ship 10
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
+	this.findFunction=function(name)
+	{
+		var toReturn=null;
+		switch(name)
+		{
+			case('move'):
+			toReturn=simpleFunctions.move;
+		}
+		return toReturn
+	}
 	this.current=this.base//need to be careful with this
 	this.thrustTypes=[style];//would you like this to be a string?
-	this.server.moveFunction=standards.moveFunction;
+	this.setToTarget=function()
+	{
+		base.listenerStack.push(compForCompPurposes.startTarget);
+		//add images
+	}
+	this.startTarget=function(pixelX,pixelY)
+	{
+		var selectedHex=base.hexify(pixelX,pixelY);
+		compForCompPurposes.target(selectedHex.X,selectedHex.Y);
+		compForCompPurposes.cancel();
+	}
 	this.target=function(selected)
 	{
-		this.partof.clearTarget();
+		this.clearTarget();
 		this.partof.clearStorage(this);
 		var succesful=false;
-		if(//forgot what I wanted here
-		if(this.partof.changeStorage('energy',this.current.energy,this));//returns false if there isn't enough energy
-		if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
+		if(this.partof.checkStorage('fuel',1))//checking fuel
 		{
-			this.selected=selected;
-			succesful=true;
-			this.imagePointer=pictures.arrow[0][getDirection(selected);//pictures will have several generic engines
-			location.targets.push(imagePointer]; 
-			var relativeX=selected.coordinateX-this.coordinateX;
-			var relativeY=selected.coordinateY-this.coordinateY;
-			this.planned=
+			if(this.partof.cango(selected.coordinateX,selected.coordinateY))//keep it on the map
 			{
-				name:'move',//what to call
-				comp:this,//where to call it form
-				args:[this,relativeX,relativeY]//other stuff
+				if(this.partof.changeStorage('energy',this.current.energy,this))//returns false if there isn't enough energy
+				{
+					if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.power)//x is always before y
+					{
+						this.partof 
+						this.selected=selected;
+						succesful=true;
+						this.imagePointer=pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines
+						location.targets.push(imagePointer); 
+						var relativeX=selected.coordinateX-this.coordinateX;
+						var relativeY=selected.coordinateY-this.coordinateY;
+						this.planned=
+						{
+							name:'move',//what to call
+							comp:this,//where to call it form, may want to figure out a special name or number
+							args:[this,relativeX,relativeY]//other stuff
+						}
+						plan.movement.push(this.planned);
+					}
+				}
 			}
-			plan.movement.push(this.planned);
 		}
 		return succesful;
 	}
-	this.setIdel()
+	this.cancel=function()
+	{
+		base.listenerStack.pop()//may need to do something fancy in future but for now we are treating it like a stack
+		//add images
+	}
+	this.setIdel=function()
 	{
 		this.planned=null
 	}
-	this.clear()
+	this.clear=function()
 	{
 		this.partof.clearStorage(this);
 		var index=location.targets.indexOf(this.imagePointer);
 		if(index!=-1)//-1 means its already gone
-			if(location.targets.[index-1].comp===this)
+			if(location.targets[index-1].comp===this)
 				location.targets.splice(index,1);
 		for(arrays in plan)//I hope this works the way I think
 			index=arrays.indexOf(this.planned);
@@ -360,27 +419,29 @@ function createEngine(index, style, level, mod, durability)
 	{
 		if(this.attributes.heatBalance>0)//if it is >0 it means electricity is conducted easily
 		{
-			damageArray=[math.sum(damagArray)];
+			damageArray=[Math.sum(damagArray)];
 			//need to finish this bit
 		}
-		for(var ag=0;ag<damageArray.length)
+		for(var ag=0;ag<damageArray.length;ag++)
 		{
 			this.enviroment.heat(damageArray[ag]);
-			this.current.condition-=math.abs(damageArray[ag]);
+			this.current.condition-=Math.abs(damageArray[ag]);
 		}
 	}]
-	this.server.doRadDamage=[function(damageArray)
+	this.server.doRadDamage=[
+	function(damageArray)
 	{//comps for the most part will be immune to radiation
 		for(var ad=0;ad<crew.length;ad++)
 		{
 			this.crew[ad].doDamage('rad',damageArray);
 		}
 	}]
-	this.doElectDamage=[function(damageArray)//this will only exist on the server version of the comp
+	this.doElectDamage=[
+	function(damageArray)//this will only exist on the server version of the comp
 	{
 		if(this.attributes.electBalance>0)//if it is >0 it means electricity is conducted easily
 		{
-			damageArray=[math.sum(damagArray)];
+			damageArray=[Math.sum(damagArray)];
 			//need to finish this bit
 		}
 		for(var ac=0;ac<damageArray.length;ac++)
@@ -389,22 +450,31 @@ function createEngine(index, style, level, mod, durability)
 			{
 				this.crew[ah].doDamage('rad',damageArray[ac]);
 			}
-			this.current.condition-=math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
-			this.current.force-=math.abs(damageArray[ac]);
-			if(math.abs(damageArray[ac])>10))
+			this.current.condition-=Math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
+			this.current.force-=Math.abs(damageArray[ac]);
+			if(Math.abs(damageArray[ac])>10)
 			{
 				this.current.distance-=1;
 			}
 		}
 	}]
+	this.actionList=[{
+		name:"Move to",
+		action:function()
+			{
+				compForCompPurposes.setToTarget()
+				//also do something with fuel
+			}
+	}]
 	switch(mod)
-	case //this is where the models will be different
 	{
-		
+		case 1://this is where the models will be different
+		{
+		}
 	}
 	switch(index)
-	case 2//give a little room for other engine variants
 	{
+		case 2://give a little room for other engine variants
 		this.server.afterAction.push(function()
 		{
 			if(this.current.condition<this.base.damage)
@@ -416,27 +486,34 @@ function createEngine(index, style, level, mod, durability)
 		this.attributes.radCore=true;
 		this.base.power=0;
 		this.current.power=0;
-		this.name=”NR Engine 2.0"
+		this.name='NR Engine 2';
 		//add attributes
 		this.cleartarget()//as a default the engine generates energy
 		{
 			this.clear();
 			this.partof.changeStorage('energy',this.current.force,this);//this wont become permanent until the end of the turn
-			if(this.current.condition<this.base.damage)
+			if(this.current.condition<this.base.damage)//will move this to idel function
 			{
 				for(var aj=0;af<this.crew.lenght;aj++)
 					crew[aj].doDamage(rad,this.base.condition-this.current.codition);
 			}
 		}
+		this.action
 		this.power=function()
 		{
-			this.clear();
-			this.partof.changeStorage('fuel',-1,this);
-			this.partof.changeStorage('energy',this.current.force,this);
+			//should check storage levels first
+			if(compForCompPurposes.partof.checkStorage('fuel',1));
+			{
+				compForCompPurposes.clear();
+				compForCompPurposes.partof.changeStorage('fuel',-1,compForCompPurposes);
+				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.current.force,compForCompPurposes);
+			}
 		}
+		this.actionList.push({name:'power',action:this.power});
 	}
+	return this;
 }
-function()
-{
-	
-}
+var mainShip=ship;
+ship.mapX=19;
+ship.mapY=19;
+ship.addComponent(new createEngine(1,1,1,0,10),0,0);

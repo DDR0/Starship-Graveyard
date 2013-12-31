@@ -27,7 +27,7 @@ var actions=
 			for(var ad=0;ad<this.actionList.length;ad++)
 			{
 				this.buttons[ad].innerHTML=this.actionList[ad].name;
-				this.buttons[ad].onclick(this.actionList[ad].action);
+				this.buttons[ad].onclick=this.actionList[ad].action;
 			}
 		else
 		{
@@ -72,11 +72,41 @@ var actions=
 var plan={
 	//check for end turns
 	crewAssists:[],//things that alter the crews abilities this may have an effect on other assists
-	otherAssists:[],//all other effects and utilities includes idels and alwayses
+	otherAssists:[],//all other effects and utilities includes idles and alwayses
 	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers may include fighting in comps
 	movement:[],//the actions that move the ship or crew
 	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
 	//storage
 	//check for begin turns
 }
+var endturn=function()
+{
+	//may want to fix this but fer now I want to control the order
+	for(var an=0;an<plan.crewAssists.length;an++)
+	{
+		plan.crewAssits.comp.findFunction(plan.crewAssists.name)(plan.crewAssists.args);
+	}
+	for(var an=0;an<plan.otherAssists.length;an++)
+	{
+		plan.otherAssits.comp.findFunction(plan.otherAssists.name)(plan.otherAssists.args);
+	}
+	for(var an=0;an<plan.fastWeapons.length;an++)
+	{
+		plan.fastWeapons.comp.findFunction(plan.fastWeapons.name)(plan.fastWeapons.args);
+	}
+	for(var an=0;an<plan.movement.length;an++)
+	{
+		plan.movement.comp.findFunction(plan.movement.name)(plan.movement.args);
+	}
+	for(var an=0;an<plan.slowWeapons.length;an++)
+	{
+		plan.slowWeapons.comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
+	}
+	mainShip.finalizeStorage();
+}
+endTurnButton=document.getElementById('endTurnButton');
+endTurnButton.innerHTML='End Turn';
+endTurnButton.width=200;
+endTurnButton.height=20;//don't know if these are the right variables.
 actions.prepare();
+base.actionsPointer=actions;

@@ -173,6 +173,27 @@ var base=
 		}
 		return newImages;
 	},
+	listenerStack:
+	[
+		function(pixelX,pixelY)
+		{
+			selectedHex=base.hexify(pixelX,pixelY);
+			selectedHex=base.hexes[selectedHex.x][selectedHex.y];
+			console.log(selectedHex);
+			if(selectedHex.compPointer!=undefined)
+			{console.log('no pointer');
+				if(selectedHex.compPointer!=null)
+				{console.log('no pointer');
+					if(base.actionsPointer!=undefined)
+					{
+						console.log('found it');
+						base.actionsPointer.setActions(selectedHex.compPointer.actionList);
+					}
+				}
+			}
+		}
+	],
+	//here is where I left off
 	newHexes:function()
 	{
 		this.hexes=new Array(this.battleHeight)
@@ -257,7 +278,7 @@ var base=
 						var relativeX=thisHex.x-otherHex.x;
 						var relativeY=thisHex.y-otherHex.y;
 						var relativeZ=thisHex.z-otherHex.z;
-						if(1===math.max(math.abs(relativeX),math.abs(relativeY),math.abs(relativeZ)))
+						if(1===Math.max(Math.abs(relativeX),Math.abs(relativeY),Math.abs(relativeZ)))
 						{
 							if(relativeX===0)
 							{
@@ -337,6 +358,8 @@ var base=
 	{
 		var windowX=event.pageX;
 		var windowY=event.pageY;
+		var pixelX=windowX-$('#main-display').offset().left;
+		var pixelY=windowY-$('#main-display').offset().top;
 		if(false)
 		{
 			console.log($('#main-display').offset().top);
@@ -346,9 +369,13 @@ var base=
 		}
 		var map=base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top);
 		base.clearSelection();
-		base.hexes[map.x][map.y].isSelected=true;
-		base.hexes[map.x][map.y].restack();
-		base.cContext.drawImage(base.coursor,0,100);
+		if(false)
+		{
+			base.hexes[map.x][map.y].isSelected=true;
+			base.hexes[map.x][map.y].restack();
+			base.cContext.drawImage(base.coursor,0,100);
+		}
+		base.listenerStack[base.listenerStack.length-1](pixelX,pixelY)
 	},
 	//most of the component code will be on the server
 	emptyComponent:function()
@@ -381,6 +408,8 @@ backgroundImage.src="images/Space Background.png";
 var coursor=new Image();
 coursor.src="images/onehex.png";
 document.getElementById('main-display').onclick=base.canvasClicked;
+base.newHexes();
+if(false)
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
