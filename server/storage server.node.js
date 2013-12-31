@@ -14,7 +14,7 @@ io.set('log level', 2);
 var _ = require('underscore');
 var sql = require('mysql2');
 var db = sql.createConnection(USE_DEBUG ? { user:'test', database:'test'} : { user:'nodejs-sg', database:'sg', host: sqlAddr, port: sqlPort});
-var c = io.log;
+var c = io.log; //Has error, warn, info, and debug which is currently disabled by log level 2 because it's ridiculous.
 
 var startTime = Math.round(new Date().getTime()/1000);
 
@@ -36,9 +36,11 @@ io.sockets.on('connection', function(socket) {
 	
 	var on = function(event_name, callback) {
 		socket.on(event_name, function(event_data) {
-			c.info('   event - ' + event_name + ' @ ' + startTime + ' + ' + (Math.round(new Date().getTime()/1000) - startTime) );
-			//USE_DEBUG ? setTimeout(callback, Math.random()*2000, event_data) : callback(event_data); //Could serve requests out of order, is this OK?
-			callback(event_data);
+			c.info('event ' + event_name + ' @ ' + startTime + ' + ' + (Math.round(new Date().getTime()/1000) - startTime) );
+			
+			//Will serve requests out of order, although sockets delivers in order.
+			//NodeJS messes it up anyway by misordering the callbacks, so we might as well test for that.
+			USE_DEBUG ? setTimeout(callback, Math.random()*2000, event_data) : callback(event_data);
 		});
 	};
 	
@@ -58,4 +60,15 @@ io.sockets.on('connection', function(socket) {
 	on('get location', function() {
 		socket.emit('get location', room);
 	});
+	
+	var storage = {};
+	on('set', function(data) {
+		_.extend(storage, data);
+		socket.emit('ok');
+	});
+	on('get', function(keys) {
+		socket.emit('print', _.pick(storage, keys));
+		socket.emit('ok', _.pick(storage, keys));
+	}); 
+	
 });

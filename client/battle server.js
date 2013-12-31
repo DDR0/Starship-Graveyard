@@ -26,6 +26,8 @@
 				});
 			});
 		});
+		
+		socket.emit('set', {foo:1, bar:2}).once('ok', socket.emit.bind(this, 'get', ['foo']));
 	});
 	
 	window.server = socket;
