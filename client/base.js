@@ -49,8 +49,9 @@ var base=
 	},
 	getHex: function(squareX,squareY)
 	{
-		var hex;
-		hex.x=squareX;
+		var hex={
+		x:squareX
+		}
 		hex.y=(squareX+squareY-((squareX-(squareX%2))/2))/2;//should be enough brackets
 		hex.z=squareY-squareX-((squareX+1-((squareX+1)%2))/2);//75% sure this is the right formula
 		return hex;
@@ -216,7 +217,7 @@ var base=
 					seeRoom:null,
 					energyImage:null,
 					seeEnergy:false,
-					targets:new Array(0),
+					targets:[],
 					pixelX:x*(this.hexWidth*3/4),
 					pixelY:(x%2===0)?(y*this.hexHeight):(this.hexHeight*(y+1/2)),
 					restack:function()
@@ -267,7 +268,7 @@ var base=
 					{
 						var otherHex=base.getHex(otherX,otherY)
 						var thisHex=base.getHex(this.coordinateX,this.coordinateY)
-						var distance=math.max(math.abs(thisHex.x-otherHex.x),math.abs(thisHex.y-otherHex.y),math.abs(thisHex.z-otherHex.z));
+						var distance=Math.max(Math.abs(thisHex.x-otherHex.x),Math.abs(thisHex.y-otherHex.y),Math.abs(thisHex.z-otherHex.z));
 						return distance;
 					},
 					getDirection:function(otherX,otherY)

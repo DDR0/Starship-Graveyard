@@ -81,31 +81,34 @@ var plan={
 }
 var endturn=function()
 {
+	console.log('end turn called');
 	//may want to fix this but fer now I want to control the order
 	for(var an=0;an<plan.crewAssists.length;an++)
 	{
-		plan.crewAssits.comp.findFunction(plan.crewAssists.name)(plan.crewAssists.args);
+		plan.crewAssits[an].comp.findFunction(plan.crewAssists.name)(plan.crewAssists.args);
 	}
 	for(var an=0;an<plan.otherAssists.length;an++)
 	{
-		plan.otherAssits.comp.findFunction(plan.otherAssists.name)(plan.otherAssists.args);
+		plan.otherAssits[an].comp.findFunction(plan.otherAssists.name)(plan.otherAssists.args);
 	}
 	for(var an=0;an<plan.fastWeapons.length;an++)
 	{
-		plan.fastWeapons.comp.findFunction(plan.fastWeapons.name)(plan.fastWeapons.args);
+		plan.fastWeapons[an].comp.findFunction(plan.fastWeapons.name)(plan.fastWeapons.args);
 	}
 	for(var an=0;an<plan.movement.length;an++)
 	{
-		plan.movement.comp.findFunction(plan.movement.name)(plan.movement.args);
+		var func=plan.movement[an].comp.findFunction(plan.movement[an].name);
+		func(plan.movement[an].args);
 	}
 	for(var an=0;an<plan.slowWeapons.length;an++)
 	{
-		plan.slowWeapons.comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
+		plan.slowWeapons[an].comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
 	}
 	mainShip.finalizeStorage();
 }
 endTurnButton=document.getElementById('endTurnButton');
 endTurnButton.innerHTML='End Turn';
+endTurnButton.onclick=endturn;
 endTurnButton.width=200;
 endTurnButton.height=20;//don't know if these are the right variables.
 actions.prepare();
