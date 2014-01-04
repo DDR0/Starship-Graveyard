@@ -97,14 +97,14 @@ var endturn=function()
 	}
 	for(var an=0;an<plan.movement.length;an++)
 	{
-		var func=plan.movement[an].comp.findFunction(plan.movement[an].name);
-		func(plan.movement[an].args);
+		plan.movement[an].comp.findFunction(plan.movement[an].name)(plan.movement[an].args);
 	}
 	for(var an=0;an<plan.slowWeapons.length;an++)
 	{
 		plan.slowWeapons[an].comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
 	}
 	mainShip.finalizeStorage();
+	//actions.clearPlan();
 }
 endTurnButton=document.getElementById('endTurnButton');
 endTurnButton.innerHTML='End Turn';

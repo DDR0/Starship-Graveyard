@@ -190,15 +190,15 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		}
 		this.images[relativeX][relativeY]=null;
 		this.destroyed[relativeX][relativeY]=nill;
-		base.hexes[relativeX+mapX][relativeY+mapY].shipImage=null;
-		base.hexes[relativeX+mapX][relativeY+mapY].compImage=null;
-		base.hexes[relativeX+mapX][relativeY+mapY].compPointer=null;
-		base.hexes[relativeX+mapX][relativeY+mapY].shipPointer=null;
-		base.hexes[relativeX+mapX][relativeY+mapY].energyImage=null;
-		base.hexes[relativeX+mapX][relativeY+mapY].seeEnergy=false;
-		base.hexes[relativeX+mapX][relativeY+mapY].seeShip=false;
-		base.hexes[relativeX+mapX][relativeY+mapY].seeRoom=false;
-		base.hexes[relativeX+mapX][relativeY+mapY].restack();
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].shipImage=null;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].compImage=null;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].compPointer=null;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].shipPointer=null;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].energyImage=null;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].seeEnergy=false;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].seeShip=false;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].seeRoom=false;
+		base.hexes[relativeX+this.mapX][relativeY+this.mapY].restack();
 	},
 	rotate:function(direction, isAbsolute)
 	{
@@ -221,15 +221,15 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		{
 			for(var u=0;u<this.images.lenght;u++)
 			{
-				base.hexes[mapX+t][mapY+u].shipImage=null;
-				base.hexes[mapX+t][mapY+u].compImage=null;
-				base.hexes[mapX+t][mapY+u].compPointer=null;
-				base.hexes[mapX+t][mapY+u].shipPointer=null;
-				base.hexes[mapX+t][mapY+u].energyImage=null;
-				base.hexes[mapX+t][mapY+u].seeEnergy=false;
-				base.hexes[mapX+t][mapY+u].seeShip=false;
-				base.hexes[mapX+t][mapY+u].seeRoom=false;
-				base.hexes[mapX+t][mapY+u].restack();
+				base.hexes[this.mapX+t][this.mapY+u].shipImage=null;
+				base.hexes[this.mapX+t][this.mapY+u].compImage=null;
+				base.hexes[this.mapX+t][this.mapY+u].compPointer=null;
+				base.hexes[this.mapX+t][this.mapY+u].shipPointer=null;
+				base.hexes[this.mapX+t][this.mapY+u].energyImage=null;
+				base.hexes[this.mapX+t][this.mapY+u].seeEnergy=false;
+				base.hexes[this.mapX+t][this.mapY+u].seeShip=false;
+				base.hexes[this.mapX+t][this.mapY+u].seeRoom=false;
+				base.hexes[this.mapX+t][this.mapY+u].restack();
 			}
 		}
 	},
@@ -240,33 +240,36 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 			for(var aa=0;aa<this.images.lenght;aa++)
 			{
 				if(comp[z][aa].isDestroyed)
-					base.hexes[mapX+z][mapY+aa].shipImage=destoyed[z][aa];
+					base.hexes[this.mapX+z][this.mapY+aa].shipImage=destoyed[z][aa];
 				else
-					base.hexes[mapX+z][mapY+aa].shipImage=images[z][aa];
-				base.hexes[mapX+z][mapY+aa].compImage=this.comps[z][aa];//get image
-				base.hexes[mapX+z][mapY+aa].compPointer=this.comps[z][aa];
-				base.hexes[mapX+z][mapY+aa].shipPointer=this;
-				base.hexes[mapX+z][mapY+aa].energyImage=null;
-				base.hexes[mapX+z][mapY+aa].seeEnergy=true;
-				base.hexes[mapX+z][mapY+aa].seeShip=true;
-				base.hexes[mapX+z][mapY+aa].seeRoom=true;
-				base.hexes[mapX+z][mapY+aa].restack();
+					base.hexes[this.mapX+z][this.mapY+aa].shipImage=images[z][aa];
+				base.hexes[this.mapX+z][this.mapY+aa].compImage=this.comps[z][aa];//get image
+				base.hexes[this.mapX+z][this.mapY+aa].compPointer=this.comps[z][aa];
+				base.hexes[this.mapX+z][this.mapY+aa].shipPointer=this;
+				base.hexes[this.mapX+z][this.mapY+aa].energyImage=null;
+				base.hexes[this.mapX+z][this.mapY+aa].seeEnergy=true;
+				base.hexes[this.mapX+z][this.mapY+aa].seeShip=true;
+				base.hexes[this.mapX+z][this.mapY+aa].seeRoom=true;
+				base.hexes[this.mapX+z][this.mapY+aa].restack();
 			}
 		}
 	},
 	teleport:function(relativeX,relativeY)
 	{
-		console.log('teleport called');
+		//call clear ship
 		this.clearImages();
 		this.mapX+=relativeX;
 		this.mapY+=relativeY;
 		for(var v=0;v<this.comps.length;v++)
 		{
-			for(var w=0;w<this.comps[v].lenth;w++)
+			for(var w=0;w<this.comps[v].length;w++)
 			{
+				console.log('made it this far');
 				if(this.comps[v][w]!=null)
 				{
-					this.comps[v][w].hex=base.hexes[v+mapX][w+mapY];
+					console.log(this.mapX,this.mapY,relativeY);
+					this.comps[v][w].location=base.hexes[v+this.mapX][w+this.mapY];
+					base.hexes[v+this.mapX][w+this.mapY].compPointer=this.comps[v][w];
 					//collisions should already be checked on the server
 				}
 			}
@@ -291,9 +294,11 @@ var simpleFunctions=
 {
 	move:function(args)
 	{
+		console.log(args);
 		comp=args[0];
-		relativeX=args[2];
-		relativeY=args[3];
+		relativeX=args[1];
+		relativeY=args[2];
+		console.log(args,relativeY);
 		comp.partof.teleport(relativeX,relativeY);//change this when translate and collisions 
 		if(comp.attributes.selfPatch)
 		{
@@ -373,6 +378,7 @@ function createEngine(index, style, level, mod, durability)
 	this.startTarget=function(pixelX,pixelY)
 	{
 		var selectedHex=base.hexify(pixelX,pixelY);
+		selectedHex=base.hexes[selectedHex.x][selectedHex.y];
 		compForCompPurposes.target(selectedHex);
 		compForCompPurposes.cancel();
 	}
@@ -393,10 +399,13 @@ function createEngine(index, style, level, mod, durability)
 						this.partof 
 						this.selected=selected;
 						succesful=true;
+						console.log(selected);
 						//this.imagePointer=pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines
 						//location.targets.push(this.imagePointer); 
-						var relativeX=selected.coordinateX-this.coordinateX;
-						var relativeY=selected.coordinateY-this.coordinateY;
+						console.log(this.location);
+						var relativeX=selected.coordinateX-this.location.coordinateX;
+						var relativeY=selected.coordinateY-this.location.coordinateY;
+						console.log(relativeX,relativeY,selected.coordinateX,this.location.coordinateX);
 						this.planned=
 						{
 							name:1,//what to call
