@@ -43,24 +43,32 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	},
 	canGo:function(relativeX,relativeY)
 	{//sees if the ship can go to the coordinates and still be on the map, doesn't check for collisions 
-		var goable=true
+		var goable=true;
 		for(var f=0;f<this.comps.length;f++)
 		{
+			console.log('made it this far');
 			for(var h=0;h<this.comps[f].length;h++)
 			{
+			console.log('made it this far');
 				if(this.comps[f][h]!=null)
 				{
+			console.log('made it this far');
 					if(this.comps[f][h].isSolid!==false)
 					{
+			console.log('made it this far');
 						if((this.comps[f][h].shipX+relativeX+this.mapX)%2==0)
 						{//would it be unprofessional to just see if hexes[f][h] is defined either way this isn't done
+			console.log(goable,(f+relativeX+this.mapX),base.battleWidth);
 							goable=(goable&&((f+relativeX+this.mapX)<base.battleWidth)&&((h+relativeY+this.mapY)<base.battleHeight));
+			console.log(goable);
 							goable=(goable&&((f+relativeX+this.mapX)>=0)&&((h+relativeY+this.mapY)>=0));
+			console.log(goable);
 						}
 						else
 						{
 							goable=(goable&&((f+relativeX+this.mapX)<base.battleWidth)&&((h+relativeY-1+this.mapY)<base.battleHeight));
 							goable=(goable&&((f+relativeX+this.mapX)>=0)&&((h+relativeY-1+this.mapY)>=0));
+			console.log(goable);
 						}
 						console.log(goable);
 					}
@@ -390,7 +398,7 @@ function createEngine(index, style, level, mod, durability)
 		if(this.partof.checkStorage('fuel',1))//checking fuel
 		{
 						console.log('made it this far');
-			// test canGo later if(this.partof.canGo(selected.coordinateX,selected.coordinateY))//keep it on the map
+			if(this.partof.canGo(selected.coordinateX-this.location.coordinateX,selected.coordinateY-this.location.coordinateY))//keep it on the map
 			
 						console.log('made it this far');
 					// test this later if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.current.distance)//x is always before y
