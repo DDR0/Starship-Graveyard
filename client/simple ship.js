@@ -399,10 +399,11 @@ function createEngine(index, style, level, mod, durability)
 		{
 						console.log('made it this far');
 			if(this.partof.canGo(selected.coordinateX-this.location.coordinateX,selected.coordinateY-this.location.coordinateY))//keep it on the map
-			
+			{
 						console.log('made it this far');
-					// test this later if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.current.distance)//x is always before y
-					
+						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY));
+				if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.current.distance)//x is always before y
+				{	
 						console.log('made it this far');
 						this.partof 
 						this.selected=selected;
@@ -421,8 +422,8 @@ function createEngine(index, style, level, mod, durability)
 							args:[this,relativeX,relativeY]//other stuff
 						}
 						plan.movement.push(this.planned);
-					
-				
+				}	
+			}	
 			
 		}
 		return succesful;
