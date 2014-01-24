@@ -5,6 +5,8 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	mapX:null,//can be negative
 	mapY:null,//can be negative
 	energyComp:null,
+	storage:{energy:0},
+	storagePlan:{energy:0},
 	comps:[[]],//both comps and images will become 2D ragged arrays when comps are added
 	images:[[]],
 	destroyed:[[]],//destroyed contains an array of images representing the ship full of holes
@@ -284,18 +286,52 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		}
 		this.drawImages();
 	},
-	checkStorage:function()
+	checkStorage:function(name,amount)//checks storage levels
 	{
-		return true;
+		return this.plannedStorage[name]>=amount;
 	},
-	changeStorage:function()
+	changeStorage:function(name,amount)
 	{
+		var enough=true;
+		if(this.checkStorage(name,amount))
+		{
+			if(this.storagePlan[name]==undefined)
+			{
+				this.storagePlan[name]={name:name,amount:amount};
+			}
+			else
+			{
+				this.storagePlan[name].amount+=amount;
+			}
+		}
+		else enough=false;
+		return enough;
 	},
 	finalizeStorage:function()
 	{
-	},
-	clearStorage:function()
-	{
+		for(var as in this.storage)
+			as.amount=0;
+		for(var ap in this.storagePlan)
+		{
+			var maxStorage=0;
+			for(var aq=0;aq<comps.length;aq++)
+			{
+				for(var ar;ar<comps[aq].length;ar++)
+				{
+					max+=comps[aq][ar].maxStorages[ap.name];
+				}
+			}
+			if(this.storage[ap.name]==undefined)
+				this.storage[ap.name]={name:ap.name,amount:0};
+			storage[ap.name].amount=Math.min(max,ap.amount);
+		}
+		for(var ap=0;ap<comps.length;ap++)
+		{
+			for(var aq=0;aq<cops[ap].length;aq++)
+			{
+				comps[ap][aq].storageChanges=[];
+			}
+		}
 	},
 }
 var simpleFunctions=
@@ -343,6 +379,7 @@ function createEngine(index, style, level, mod, durability)
 	{
 		heatBalance:true,
 	};
+	this.storageChanges=[];
 	this.crew=[];
 	this.server=
 	{
@@ -401,7 +438,7 @@ function createEngine(index, style, level, mod, durability)
 			if(this.partof.canGo(selected.coordinateX-this.location.coordinateX,selected.coordinateY-this.location.coordinateY))//keep it on the map
 			{
 						console.log('made it this far');
-						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY));
+						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY)) ;
 				if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.current.distance)//x is always before y
 				{	
 						console.log('made it this far');
@@ -439,7 +476,7 @@ function createEngine(index, style, level, mod, durability)
 	}
 	this.clear=function()
 	{
-		this.partof.clearStorage(this);
+		this.reverseStorage();
 		//var index=location.targets.indexOf(this.imagePointer);
 		//if(index!=-1)//-1 means its already gone
 			//if(location.targets[index-1].comp===this)
@@ -449,6 +486,14 @@ function createEngine(index, style, level, mod, durability)
 			if(index!=-1)
 				arrays.splice(indes,1);
 		this.setIdel()
+	}
+	this.reverseStorage=function()
+	{
+		for(items in this.storage)
+		{
+			this.partof.changeStorage(items.name,-items.amount);
+		}
+		this.storageChanges=[];
 	}
 	this.clearTarget=function()
 	{
@@ -545,8 +590,12 @@ function createEngine(index, style, level, mod, durability)
 			if(compForCompPurposes.partof.checkStorage('fuel',1));
 			{
 				compForCompPurposes.clear();
-				compForCompPurposes.partof.changeStorage('fuel',-1,compForCompPurposes);
-				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.current.force,compForCompPurposes);
+				compForCompPurposes.partof.changeStorage('fuel',-1);
+				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.current.force);
+				var newStorageChange={name:'fuel',amount:-1};
+				compForCompPurposes.storageChanges.push(newStorageChange);
+				newStorageChange={name:'energy',amount:compForCompPurposes.current.force};
+				compForCompPurposes.storageChanges.push(newStorageChange);
 			}
 		}
 		this.actionList.push({name:'power',action:this.power});
@@ -557,3 +606,5 @@ var mainShip=ship;
 ship.mapX=19;
 ship.mapY=19;
 ship.addComponent(new createEngine(1,1,1,0,10),0,0);
+var comp=ship.comps[0][0];
+var newStorage={name:'energy',amount:'1'};
