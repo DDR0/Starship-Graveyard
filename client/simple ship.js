@@ -5,8 +5,8 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	mapX:null,//can be negative
 	mapY:null,//can be negative
 	energyComp:null,
-	storage:{energy:0},
-	storagePlan:{energy:0},
+	storage:{energy:{name:'energy',amount:0}},
+	storagePlan:{energy:{name:'energy',amount:0},fuel:{name:'fuel',amount:0}},
 	comps:[[]],//both comps and images will become 2D ragged arrays when comps are added
 	images:[[]],
 	destroyed:[[]],//destroyed contains an array of images representing the ship full of holes
@@ -277,6 +277,10 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 				console.log('made it this far');
 				if(this.comps[v][w]!=null)
 				{
+					if(this.comps[v][w]===this.comps[v][w].location.compPointer)
+						this.comps[v][w].location.compPointer=null;
+					else
+						console.log(this.comps[v][w],this.comps[v][w].location.compPointer,'fart');
 					console.log(this.mapX,this.mapY,relativeY);
 					this.comps[v][w].location=base.hexes[v+this.mapX][w+this.mapY];
 					base.hexes[v+this.mapX][w+this.mapY].compPointer=this.comps[v][w];
@@ -291,7 +295,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		if(this.storagePlan[name]==undefined)
 			return false;
 		else
-			return -this.storagePlan[name]<=amount;
+			return -this.storagePlan[name].amount<=amount;
 	},
 	changeStorage:function(name,amount)
 	{
@@ -313,7 +317,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		else
 		{
 			this.storagePlan[name].amount+=amount;
-			console.log(this.storagePlan[name].amount);
+			console.log(this.storagePlan[name].amount,amount);
 		}
 	},
 	finalizeStorage:function()
@@ -323,22 +327,23 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		for(var ap in this.storagePlan)
 		{
 			var maxStorage=0;
-			for(var aq=0;aq<comps.length;aq++)
+			for(var aq=0;aq<this.comps.length;aq++)
 			{
-				for(var ar;ar<comps[aq].length;ar++)
+				for(var ar;ar<this.comps[aq].length;ar++)
 				{
-					max+=comps[aq][ar].maxStorages[ap.name];
+					if(this.comps[aq][ar].maxStorages[ap.name]!=undefined)
+						maxStorage+=this.comps[aq][ar].maxStorages[ap.name];
 				}
 			}
 			if(this.storage[ap.name]==undefined)
 				this.storage[ap.name]={name:ap.name,amount:0};
-			storage[ap.name].amount=Math.min(max,ap.amount);
+			this.storage[ap.name].amount=Math.min(maxStorage,ap.amount);
 		}
-		for(var ap=0;ap<comps.length;ap++)
+		for(var ap=0;ap<this.comps.length;ap++)
 		{
-			for(var aq=0;aq<cops[ap].length;aq++)
+			for(var aq=0;aq<this.comps[ap].length;aq++)
 			{
-				comps[ap][aq].storageChanges=[];
+				this.comps[ap][aq].storageChanges=[];
 			}
 		}
 	},
@@ -439,7 +444,7 @@ function createEngine(index, style, level, mod, durability)
 	this.target=function(selected)
 	{
 		this.clearTarget();
-		this.partof.clearStorage(this);
+		this.reverseStorage();
 		var succesful=false;
 		if(this.partof.checkStorage('fuel',1))//checking fuel
 		{
@@ -498,9 +503,10 @@ function createEngine(index, style, level, mod, durability)
 	}
 	this.reverseStorage=function()
 	{
-		for(items in this.storage)
+		for(items in this.storageChanges)
 		{
-			this.partof.changeStorage(items.name,-items.amount);
+			console.log(items,items.name);
+			console.log(this.partof.forceStorage(items.name,-items.amount));
 		}
 		this.storageChanges=[];
 	}
@@ -616,5 +622,7 @@ ship.mapX=19;
 ship.mapY=19;
 ship.addComponent(new createEngine(1,1,1,0,10),0,0);
 var comp=ship.comps[0][0];
-var newStorage={name:'energy',amount:'1'};
+var newStorage={name:'energy',amount:1};
 console.log(mainShip.changeStorage(newStorage.name,newStorage.amount));
+comp.storageChanges=[newStorage];
+comp.reverseStorage();
