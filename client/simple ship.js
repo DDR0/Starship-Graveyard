@@ -288,24 +288,33 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	},
 	checkStorage:function(name,amount)//checks storage levels
 	{
-		return this.plannedStorage[name]>=amount;
+		if(this.storagePlan[name]==undefined)
+			return false;
+		else
+			return -this.storagePlan[name]<=amount;
 	},
 	changeStorage:function(name,amount)
 	{
 		var enough=true;
 		if(this.checkStorage(name,amount))
 		{
-			if(this.storagePlan[name]==undefined)
-			{
-				this.storagePlan[name]={name:name,amount:amount};
-			}
-			else
-			{
-				this.storagePlan[name].amount+=amount;
-			}
+			this.forceStorage(name,amount)
 		}
 		else enough=false;
 		return enough;
+	},
+	forceStorage:function(name,amount)
+	{
+		if(this.storagePlan[name]==undefined)
+		{
+			this.storagePlan[name]={name:name,amount:amount};
+			console.log(this.storagePlan[name].amount);
+		}
+		else
+		{
+			this.storagePlan[name].amount+=amount;
+			console.log(this.storagePlan[name].amount);
+		}
 	},
 	finalizeStorage:function()
 	{
@@ -608,3 +617,4 @@ ship.mapY=19;
 ship.addComponent(new createEngine(1,1,1,0,10),0,0);
 var comp=ship.comps[0][0];
 var newStorage={name:'energy',amount:'1'};
+console.log(mainShip.changeStorage(newStorage.name,newStorage.amount));
