@@ -505,8 +505,8 @@ function createEngine(index, style, level, mod, durability)
 	{
 		for(items in this.storageChanges)
 		{
-			console.log(items,items.name);
-			console.log(this.partof.forceStorage(items.name,-items.amount));
+			console.log(this.storageChanges[items],this.storageChanges[items].name);
+			console.log(this.partof.forceStorage(this.storageChanges[items].name,-this.storageChanges[items].amount));
 		}
 		this.storageChanges=[];
 	}
