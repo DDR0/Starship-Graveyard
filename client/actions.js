@@ -76,6 +76,24 @@ var plan={
 	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers may include fighting in comps
 	movement:[],//the actions that move the ship or crew
 	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
+	removeAction:function(action)
+	{
+		var index=plan.crewAssists.indexOf(plannedAction[ap]);
+		if(index>0)
+			plan.crewAssists.splice(index,1);
+		index=plan.otherAssists.indexOf(plannedAction[ap]);
+		if(index>0)
+			plan.otherAssists.splice(index,1);
+		index=plan.fastWeapons.indexOf(plannedAction[ap]);
+		if(index>0)
+			plan.fastWeapons.splice(index,1);
+		index=plan.movement.indexOf(plannedAction[ap]);
+		if(index>0)
+			plan.movement.splice(index,1);
+		index=plan.slowWeapons.indexOf(plannedAction[ap]);
+		if(index>0)
+			plan.slowWeapons.splice(index,1);
+	}
 	//storage
 	//check for begin turns
 }
@@ -97,7 +115,7 @@ var endturn=function()
 	}
 	for(var an=0;an<plan.movement.length;an++)
 	{
-		plan.movement[an].comp.findFunction(plan.movement[an].name)(plan.movement[an].args);
+		plan.movement[an].component.findFunction(plan.movement[an].functionName)(plan.movement[an].args);
 	}
 	for(var an=0;an<plan.slowWeapons.length;an++)
 	{
@@ -105,6 +123,24 @@ var endturn=function()
 	}
 	mainShip.finalizeStorage();
 	//actions.clearPlan();
+}
+actionInfo=function(actionRank,name,comp)//creates an object for storing info about 
+{
+	this.rank=actionRank;
+	this.storageEffects=null;
+	this.args=[];
+	this.functionName=name;
+	this.component=comp;
+	this.reverseStorage=function()
+	{
+		for(items in this.storageEffects)
+		{
+			console.log(items,this.storageEffects[items]);
+			console.log(this.comp.partof.forceStorage(items,-this.storageEffects[items]));
+		}
+		this.storageEffects=[];
+	}
+	return this;
 }
 endTurnButton=document.getElementById('endTurnButton');
 endTurnButton.innerHTML='End Turn';
