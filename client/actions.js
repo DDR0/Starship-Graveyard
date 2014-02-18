@@ -73,25 +73,26 @@ var plan={
 	//check for end turns
 	crewAssists:[],//things that alter the crews abilities this may have an effect on other assists
 	otherAssists:[],//all other effects and utilities includes idles and alwayses
-	fastWeapons:{},//weapons that hit the target immediately after being fired like lasers may include fighting in comps
+	fastWeapons:[],//weapons that hit the target immediately after being fired like lasers may include fighting in comps
 	movement:[],//the actions that move the ship or crew
 	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
 	removeAction:function(action)
 	{
-		var index=plan.crewAssists.indexOf(plannedAction[ap]);
-		if(index>0)
+		var index=plan.crewAssists.indexOf(action);
+		if(index>=0)
 			plan.crewAssists.splice(index,1);
-		index=plan.otherAssists.indexOf(plannedAction[ap]);
-		if(index>0)
+		index=plan.otherAssists.indexOf(action);
+		if(index>=0)
 			plan.otherAssists.splice(index,1);
-		index=plan.fastWeapons.indexOf(plannedAction[ap]);
-		if(index>0)
+		index=plan.fastWeapons.indexOf(action);
+		if(index>=0)
 			plan.fastWeapons.splice(index,1);
-		index=plan.movement.indexOf(plannedAction[ap]);
-		if(index>0)
+		index=plan.movement.indexOf(action);
+		console.log(index);
+		if(index>=0)
 			plan.movement.splice(index,1);
-		index=plan.slowWeapons.indexOf(plannedAction[ap]);
-		if(index>0)
+		index=plan.slowWeapons.indexOf(action);
+		if(index>=0)
 			plan.slowWeapons.splice(index,1);
 	}
 	//storage
@@ -121,13 +122,13 @@ var endturn=function()
 	{
 		plan.slowWeapons[an].comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
 	}
-	mainShip.finalizeStorage();
+	//mainShip.finalizeStorage();
 	//actions.clearPlan();
 }
 actionInfo=function(actionRank,name,comp)//creates an object for storing info about 
 {
 	this.rank=actionRank;
-	this.storageEffects=null;
+	this.storageEffects={};
 	this.args=[];
 	this.functionName=name;
 	this.component=comp;
@@ -136,7 +137,7 @@ actionInfo=function(actionRank,name,comp)//creates an object for storing info ab
 		for(items in this.storageEffects)
 		{
 			console.log(items,this.storageEffects[items]);
-			console.log(this.comp.partof.forceStorage(items,-this.storageEffects[items]));
+			console.log(this.component.partof.forceStorage(items,-this.storageEffects[items]));
 		}
 		this.storageEffects=[];
 	}

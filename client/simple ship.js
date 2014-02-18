@@ -5,8 +5,8 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	mapX:null,//can be negative
 	mapY:null,//can be negative
 	energyComp:null,
-	storage:{energy:{name:'energy',amount:0}},
-	storagePlan:{energy:{name:'energy',amount:0},fuel:{name:'fuel',amount:0}},
+	storage:{energy:0,fuel:10},
+	storagePlan:{energy:0,fuel:10},
 	comps:[[]],//both comps and images will become 2D ragged arrays when comps are added
 	images:[[]],
 	destroyed:[[]],//destroyed contains an array of images representing the ship full of holes
@@ -295,7 +295,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 		if(this.storagePlan[name]==undefined)
 			return false;
 		else
-			return -this.storagePlan[name].amount<=amount;
+			return -this.storagePlan[name]<=amount;
 	},
 	changeStorage:function(name,amount)
 	{
@@ -311,19 +311,19 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	{
 		if(this.storagePlan[name]==undefined)
 		{
-			this.storagePlan[name]={name:name,amount:amount};
-			console.log(this.storagePlan[name].amount);
+			this.storagePlan[name]=amount;
+			console.log(this.storagePlan[name]);
 		}
 		else
 		{
-			this.storagePlan[name].amount+=amount;
-			console.log(this.storagePlan[name].amount,amount);
+			this.storagePlan[name]+=amount;
+			console.log(this.storagePlan[name],amount);
 		}
 	},
 	finalizeStorage:function()
 	{
 		for(var as in this.storage)
-			as.amount=0;
+			as=0;
 		for(var ap in this.storagePlan)
 		{
 			var maxStorage=0;
@@ -335,7 +335,7 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 						maxStorage+=this.comps[aq][ar].maxStorages[ap.name];
 				}
 			}
-			if(this.storage[ap.name]==undefined)
+			if(this.storage[ap]==undefined)
 				this.storage[ap.name]={name:ap.name,amount:0};
 			this.storage[ap.name].amount=Math.min(maxStorage,ap.amount);
 		}
@@ -433,7 +433,7 @@ function createEngine(index, style, level, mod, durability)
 	{
 		for(stat in this.server.base)
 		{
-			this.stat=this.server.base.stat;
+			this[stat]=this.server.base[stat];
 		}
 	}
 	this.findFunction=function(name)
@@ -464,11 +464,13 @@ function createEngine(index, style, level, mod, durability)
 	{
 		this.clearTarget();
 		var succesful=false;
+					console.log('made it this far');
 		if(this.partof.checkStorage('fuel',-2))//checking fuel
 		{
+					console.log('made it this far');
 			if(this.partof.canGo(selected.coordinateX-this.location.coordinateX,selected.coordinateY-this.location.coordinateY))//keep it on the map
 			{
-						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY)) ;
+						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY));
 				if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.distance)//x is always before y
 				{	
 					console.log('made it this far');
@@ -482,12 +484,12 @@ function createEngine(index, style, level, mod, durability)
 					var relativeX=selected.coordinateX-this.location.coordinateX;
 					var relativeY=selected.coordinateY-this.location.coordinateY;
 					console.log(relativeX,relativeY,selected.coordinateX,this.location.coordinateX);
-					planned=new actionInfo(this.priority,this.move,this);
+					planned=new actionInfo(this.primary,this.move,this);
 					planned.args=[this,relativeX,relativeY];//other stuff
 					planned.storageEffects.fuel=-2;
-					partof.forceStorage('fuel',-2);
+					this.partof.forceStorage('fuel',-2);
 					plan.movement.push(planned);
-					planAction(planned);
+					this.planAction(planned);
 				}	
 			}	
 		}
@@ -495,17 +497,22 @@ function createEngine(index, style, level, mod, durability)
 	}
 	this.planAction=function(newAction)
 	{
-		for(var ap=0;ap<=this.plannedActions.lengt;ap++)
+		console.log('made it this far');
+		for(var ap=0;ap<this.plannedActions.length;ap++)
 		{
-			if(newAction.rank+this.plannedActions[ap].rank>this.maxRank)
+			console.log(newAction.rank,this.plannedActions[ap].rank);
+			if((newAction.rank+this.plannedActions[ap].rank)>this.maxRank)
 			{
+				console.log('compared happend');
 				this.plannedActions[ap].reverseStorage();
-				plan.removeAction(plannedActions[ap]);
+				plan.removeAction(this.plannedActions[ap]);
 				this.plannedActions.splice(ap,1);
 				ap--;
 			}
 			
 		}
+		this.plannedActions.push(newAction);
+		plan.movement.push(newAction);
 	}
 	this.cancel=function()//stops the targeting process allowing the user to do other things
 	{
@@ -617,18 +624,18 @@ function createEngine(index, style, level, mod, durability)
 			}
 		}
 		this.action
-		this.power=function()
+		this.power=function()//sets up the power action
 		{
 			//should check storage levels first
-			if(compForCompPurposes.partof.checkStorage('fuel',1));
+			if(compForCompPurposes.partof.checkStorage('fuel',-1));
 			{
 				compForCompPurposes.clear();
+				var planned=new actionInfo(compForCompPurposes.primary,'',compForCompPurposes)
+				planned.storageEffects.fuel=-1;
+				planned.storageEffects.energy=compForCompPurposes.force;
 				compForCompPurposes.partof.changeStorage('fuel',-1);
 				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.force);
-				var newStorageChange={name:'fuel',amount:-1};
-				compForCompPurposes.storageChanges.push(newStorageChange);
-				newStorageChange={name:'energy',amount:compForCompPurposes.force};
-				compForCompPurposes.storageChanges.push(newStorageChange);
+				compForCompPurposes.planAction(planned);
 			}
 		}
 		this.actionList.push({name:'power',action:this.power});
@@ -642,5 +649,4 @@ ship.mapY=19;
 ship.addComponent(new createEngine(2,1,1,0,10),0,0);
 var comp=ship.comps[0][0];
 var newStorage={name:'energy',amount:1};
-console.log(mainShip.changeStorage(newStorage.name,newStorage.amount));
-comp.storageChanges=[newStorage];
+ship.storagePlan.fuel=10;
