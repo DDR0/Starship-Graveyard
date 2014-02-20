@@ -30,11 +30,23 @@ var available_rooms = {
 	'blue base': true,
 	'battleground': true,
 };
+
+var users_data = {};
+
+var authUserById = function(uid, pass) {
+	var tmpPasses = {
+		jarvis: "k93mx",
+		david: "k94mx4",
+		test: "password",
+	};
+	return tmpPasses[uid]===pass;
+};
 	
-io.sockets.on('connection', function(socket) {
-	var room = "red base";
+io.sockets.once('connection', function(socket) {
+	c.info('connected…');
 	
 	var on = function(event_name, callback) {
+		c.info('registered ' + event_name);
 		socket.on(event_name, function(event_data) {
 			c.info('event ' + event_name + ' @ ' + startTime + ' + ' + (Math.round(new Date().getTime()/1000) - startTime) );
 			
@@ -45,30 +57,47 @@ io.sockets.on('connection', function(socket) {
 	};
 	
 	on('ping', function() {
+		c.info('got ping');
 		socket.emit('pong');
 	});
 	
-	on('set location', function(dest) {
-		if(dest && available_rooms[dest]) {
-			room = dest;
-			socket.emit('set location', true);
-			return;
+	socket.once('login', function login(event) {
+		c.info('login args', arguments);
+		if(!authUserById(event.nick, event.pass)) {
+			c.info('failed login');
+			socket.emit('fail');
+			socket.once('login', login); //Wait for the next attempt.
+		} else {
+			c.info('passed login');
+			var nick = event.nick;
+			var user_data = users_data[nick] || (users_data[nick] = {
+				room: Math.random()<0.5?"red base":"blue base",
+				store: {},
+			});
+		
+			on('set location', function(dest) {
+				if(dest && available_rooms[dest]) {
+					user_data.room = dest;
+					socket.emit('ok');
+					return;
+				}
+				socket.emit('fail');
+			});
+			
+			on('get location', function() {
+				socket.emit('ok', user_data.room);
+			});
+			
+			on('set', function(data) {
+				_.extend(user_data.store, data);
+				socket.emit('ok');
+			});
+			on('get', function(keys) {
+				socket.emit('ok', _.pick(user_data.store, keys));
+			}); 
+		
+			socket.emit('ok');
 		}
-		socket.emit('set location', false);
 	});
-	
-	on('get location', function() {
-		socket.emit('get location', room);
-	});
-	
-	var storage = {};
-	on('set', function(data) {
-		_.extend(storage, data);
-		socket.emit('ok');
-	});
-	on('get', function(keys) {
-		socket.emit('print', _.pick(storage, keys));
-		socket.emit('ok', _.pick(storage, keys));
-	}); 
 	
 });
