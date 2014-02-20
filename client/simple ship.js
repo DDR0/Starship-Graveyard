@@ -5,8 +5,8 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	mapX:null,//can be negative
 	mapY:null,//can be negative
 	energyComp:null,
-	storage:{energy:0},
-	storagePlan:{energy:0},
+	storage:{energy:0,fuel:10},
+	storagePlan:{energy:0,fuel:10},
 	comps:[[]],//both comps and images will become 2D ragged arrays when comps are added
 	images:[[]],
 	destroyed:[[]],//destroyed contains an array of images representing the ship full of holes
@@ -277,6 +277,10 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 				console.log('made it this far');
 				if(this.comps[v][w]!=null)
 				{
+					if(this.comps[v][w]===this.comps[v][w].location.compPointer)
+						this.comps[v][w].location.compPointer=null;
+					else
+						console.log(this.comps[v][w],this.comps[v][w].location.compPointer,'fart');
 					console.log(this.mapX,this.mapY,relativeY);
 					this.comps[v][w].location=base.hexes[v+this.mapX][w+this.mapY];
 					base.hexes[v+this.mapX][w+this.mapY].compPointer=this.comps[v][w];
@@ -307,38 +311,39 @@ var ship=//this ship is meant for the players ship the enemies ship will be diff
 	{
 		if(this.storagePlan[name]==undefined)
 		{
-			this.storagePlan[name]={name:name,amount:amount};
-			console.log(this.storagePlan[name].amount);
+			this.storagePlan[name]=amount;
+			console.log(this.storagePlan[name]);
 		}
 		else
 		{
-			this.storagePlan[name].amount+=amount;
-			console.log(this.storagePlan[name].amount);
+			this.storagePlan[name]+=amount;
+			console.log(this.storagePlan[name],amount);
 		}
 	},
 	finalizeStorage:function()
 	{
 		for(var as in this.storage)
-			as.amount=0;
+			as=0;
 		for(var ap in this.storagePlan)
 		{
 			var maxStorage=0;
-			for(var aq=0;aq<comps.length;aq++)
+			for(var aq=0;aq<this.comps.length;aq++)
 			{
-				for(var ar;ar<comps[aq].length;ar++)
+				for(var ar;ar<this.comps[aq].length;ar++)
 				{
-					max+=comps[aq][ar].maxStorages[ap.name];
+					if(this.comps[aq][ar].maxStorages[ap.name]!=undefined)
+						maxStorage+=this.comps[aq][ar].maxStorages[ap.name];
 				}
 			}
-			if(this.storage[ap.name]==undefined)
+			if(this.storage[ap]==undefined)
 				this.storage[ap.name]={name:ap.name,amount:0};
-			storage[ap.name].amount=Math.min(max,ap.amount);
+			this.storage[ap.name].amount=Math.min(maxStorage,ap.amount);
 		}
-		for(var ap=0;ap<comps.length;ap++)
+		for(var ap=0;ap<this.comps.length;ap++)
 		{
-			for(var aq=0;aq<cops[ap].length;aq++)
+			for(var aq=0;aq<this.comps[ap].length;aq++)
 			{
-				comps[ap][aq].storageChanges=[];
+				this.comps[ap][aq].storageChanges=[];
 			}
 		}
 	},
@@ -355,25 +360,25 @@ var simpleFunctions=
 		comp.partof.teleport(relativeX,relativeY);//change this when translate and collisions 
 		if(comp.attributes.selfPatch)
 		{
-			if(comp.current.force<this.comp.base.force)
+			if(comp.force<this.comp.server.base.force)
 			{//this is to correct ion damage but I may need to improve how corrections are done
-				comp.current.force++;
+				comp.force++;
 			}
-			if(comp.current.distance<this.comp.base.distance)
+			if(comp.distance<this.comp.server.base.distance)
 			{
-				comp.current.distance++;
+				comp.distance++;
 			}
 		}
 		if(comp.attributes.radCore)
 		{
 			for(var af=0;af<crew.length;af++)
 			{
-				comp.crew[af].doDamage('rad', this.comp.base.distance*(this.comp.base.condition-this.comp.current.condition));
+				comp.crew[af].doDamage('rad', this.comp.server.base.distance*(this.comp.server.base.condition-this.comp.condition));
 			}
 		}
 		else
 		{
-			//comp.enviroment.heat(this.comp.base.condition-this.comp.current.condition);
+			//comp.enviroment.heat(this.comp.server.base.condition-this.comp.condition);
 		}
 	}
 };
@@ -384,22 +389,36 @@ function createEngine(index, style, level, mod, durability)
 	this.isSelected=false;
 	this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
 	this.isDestroyed=false;
+	this.move=1;//identifier for a move function used with find function
+	this.only=10;//actions ranked only with stop all other planned actions except for passive
+	this.primary=8;//actions with a rank of primary allow for few other things to be done
+	//I'm leaving it open for other ranks
+	this.aux=1;//aux actions don't take much form the component so it can also do a primary action
+	this.passive=0;//passive actions do not require anything from the component
+	//More complex components will have several actions that can be done simultaneously rank determines actions that can be used
+	//together. For example if you imagine a bedroom was a component you could sleep in your room but only sleep if you wanted
+	//to invite a friend over you would have to cancel your sleep plans. Other actions can be done in the room besides hanging out
+	//you and your friend could listen to music. You cannot, however, listen to music and sleep. You can do passive actions like
+	//charging your phone to while you are sleeping.
+	this.maxRank=10;//no two actions can have a sum of ranks that exceed the maxRank
 	this.attributes=
 	{
 		heatBalance:true,
 	};
-	this.storageChanges=[];
-	this.crew=[];
+	this.crew=[];//the actions that are planned to be executed when the turn is ended.
+	this.thrustTypes=[style];//would you like this to be a string?
+	this.plannedActions=[];//the crew that is currently in the component
 	this.server=
 	{
 		idel:[],
 		always:[],
 		afterIdel:[],
 		afterAlways:[],
+		after:null,
 		afterMove:[],
 		afterAction:[],
 	}//will be set back to null to keep most of the functions on the server
-	this.base=//the normal stats, what the comp becomes after it is repaired
+	this.server.base=//the normal stats, what the comp becomes after it is repaired
 	{
 		condition:durability,//how much damage the engine can take before it is nolonge there
 		funcional:durability,//how much damage before the engine is completely useless
@@ -410,26 +429,31 @@ function createEngine(index, style, level, mod, durability)
 		//It should be noted that an engine will still only move a ship only one space a turn even if it can move another ship 10
 		//times as big one space this is related to a rather interesting physical phenomenon--hey is that free food behind you!
 	}
-	this.current=this.base//need to be careful with this
+	this.setToBase=function()//sets all the components stats to there base
+	{
+		for(stat in this.server.base)
+		{
+			this[stat]=this.server.base[stat];
+		}
+	}
 	this.findFunction=function(name)
 	{
 		var toReturn=null;
 		console.log(name);
 		switch(name)
 		{
-			case(1):
+			case(this.move):
 			console.log('found move');
 			toReturn=simpleFunctions.move;
 		}
 		return toReturn
 	}
-	this.thrustTypes=[style];//would you like this to be a string?
-	this.setToTarget=function()
+	this.setToTarget=function()//gets everything ready to selected the target there is a whole lot to get ready trust me
 	{
 		base.listenerStack.push(compForCompPurposes.startTarget);
 		//add images
 	}
-	this.startTarget=function(pixelX,pixelY)
+	this.startTarget=function(pixelX,pixelY)//sets the target and cancels the target setting or just cancels the target setting
 	{
 		var selectedHex=base.hexify(pixelX,pixelY);
 		selectedHex=base.hexes[selectedHex.x][selectedHex.y];
@@ -439,45 +463,61 @@ function createEngine(index, style, level, mod, durability)
 	this.target=function(selected)
 	{
 		this.clearTarget();
-		this.partof.clearStorage(this);
 		var succesful=false;
-		if(this.partof.checkStorage('fuel',1))//checking fuel
+					console.log('made it this far');
+		if(this.partof.checkStorage('fuel',-2))//checking fuel
 		{
-						console.log('made it this far');
+					console.log('made it this far');
 			if(this.partof.canGo(selected.coordinateX-this.location.coordinateX,selected.coordinateY-this.location.coordinateY))//keep it on the map
 			{
-						console.log('made it this far');
-						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY)) ;
-				if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.current.distance)//x is always before y
+						console.log(this.location.getDistance(selected.coordinateX,selected.coordinateY));
+				if(this.location.getDistance(selected.coordinateX,selected.coordinateY)<=this.distance)//x is always before y
 				{	
-						console.log('made it this far');
-						this.partof 
-						this.selected=selected;
-						succesful=true;
-						console.log(selected);
-						//this.imagePointer=pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines
-						//location.targets.push(this.imagePointer); 
-						console.log(this.location);
-						var relativeX=selected.coordinateX-this.location.coordinateX;
-						var relativeY=selected.coordinateY-this.location.coordinateY;
-						console.log(relativeX,relativeY,selected.coordinateX,this.location.coordinateX);
-						this.planned=
-						{
-							name:1,//what to call
-							comp:this,//where to call it form, may want to figure out a special name or number
-							args:[this,relativeX,relativeY]//other stuff
-						}
-						plan.movement.push(this.planned);
+					console.log('made it this far');
+					this.partof 
+					this.selected=selected;
+					succesful=true;
+					console.log(selected);
+					//this.imagePointer=pictures.arrow[0][getDirection(selected)];//pictures will have several generic engines
+					//location.targets.push(this.imagePointer); 
+					console.log(this.location);
+					var relativeX=selected.coordinateX-this.location.coordinateX;
+					var relativeY=selected.coordinateY-this.location.coordinateY;
+					console.log(relativeX,relativeY,selected.coordinateX,this.location.coordinateX);
+					planned=new actionInfo(this.primary,this.move,this);
+					planned.args=[this,relativeX,relativeY];//other stuff
+					planned.storageEffects.fuel=-2;
+					this.partof.forceStorage('fuel',-2);
+					plan.movement.push(planned);
+					this.planAction(planned);
 				}	
 			}	
-			
 		}
 		return succesful;
 	}
-	this.cancel=function()
+	this.planAction=function(newAction)
+	{
+		console.log('made it this far');
+		for(var ap=0;ap<this.plannedActions.length;ap++)
+		{
+			console.log(newAction.rank,this.plannedActions[ap].rank);
+			if((newAction.rank+this.plannedActions[ap].rank)>this.maxRank)
+			{
+				console.log('compared happend');
+				this.plannedActions[ap].reverseStorage();
+				plan.removeAction(this.plannedActions[ap]);
+				this.plannedActions.splice(ap,1);
+				ap--;
+			}
+			
+		}
+		this.plannedActions.push(newAction);
+		plan.movement.push(newAction);
+	}
+	this.cancel=function()//stops the targeting process allowing the user to do other things
 	{
 		base.listenerStack.pop()//may need to do something fancy in future but for now we are treating it like a stack
-		//add images
+		//remove images
 	}
 	this.setIdel=function()
 	{
@@ -485,7 +525,6 @@ function createEngine(index, style, level, mod, durability)
 	}
 	this.clear=function()
 	{
-		this.reverseStorage();
 		//var index=location.targets.indexOf(this.imagePointer);
 		//if(index!=-1)//-1 means its already gone
 			//if(location.targets[index-1].comp===this)
@@ -495,14 +534,6 @@ function createEngine(index, style, level, mod, durability)
 			if(index!=-1)
 				arrays.splice(indes,1);
 		this.setIdel()
-	}
-	this.reverseStorage=function()
-	{
-		for(items in this.storage)
-		{
-			this.partof.changeStorage(items.name,-items.amount);
-		}
-		this.storageChanges=[];
 	}
 	this.clearTarget=function()
 	{
@@ -519,7 +550,7 @@ function createEngine(index, style, level, mod, durability)
 		for(var ag=0;ag<damageArray.length;ag++)
 		{
 			this.enviroment.heat(damageArray[ag]);
-			this.current.condition-=Math.abs(damageArray[ag]);
+			this.condition-=Math.abs(damageArray[ag]);
 		}
 	}]
 	this.server.doRadDamage=[
@@ -530,7 +561,7 @@ function createEngine(index, style, level, mod, durability)
 			this.crew[ad].doDamage('rad',damageArray);
 		}
 	}]
-	this.doElectDamage=[
+	this.server.doElectDamage=[
 	function(damageArray)//this will only exist on the server version of the comp
 	{
 		if(this.attributes.electBalance>0)//if it is >0 it means electricity is conducted easily
@@ -544,11 +575,11 @@ function createEngine(index, style, level, mod, durability)
 			{
 				this.crew[ah].doDamage('rad',damageArray[ac]);
 			}
-			this.current.condition-=Math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
-			this.current.force-=Math.abs(damageArray[ac]);
+			this.condition-=Math.abs(damageArray[ac]);//abs because elect damage can be positive or negative
+			this.force-=Math.abs(damageArray[ac]);
 			if(Math.abs(damageArray[ac])>10)
 			{
-				this.current.distance-=1;
+				this.distance-=1;
 			}
 		}
 	}]
@@ -571,50 +602,51 @@ function createEngine(index, style, level, mod, durability)
 		case 2://give a little room for other engine variants
 		this.server.afterAction.push(function()
 		{
-			if(this.current.condition<this.base.codition)
+			if(this.condition<this.server.base.codition)
 			{
 				for(var aj=0;aj<this.crew.lenght;aj++)
-					crew[aj].doDamage('rad',this.base.condition-this.current.codition);
+					crew[aj].doDamage('rad',this.server.base.condition-this.codition);
 			}
 		})
 		this.attributes.radCore=true;
-		this.base.power=0;
-		this.current.power=0;
+		this.server.base.power=0;
+		this.power=0;
 		this.name='NR Engine 2';
 		//add attributes
-		this.cleartarget()//as a default the engine generates energy
+		this.cleartarget=function()//as a default the engine generates energy
 		{
 			this.clear();
-			this.partof.changeStorage('energy',this.current.force,this);//this wont become permanent until the end of the turn
-			if(this.current.condition<this.base.damage)//will move this to idel function
+			this.partof.changeStorage('energy',this.force,this);//this wont become permanent until the end of the turn
+			if(this.condition<this.server.base.condition)//will move this to idel function
 			{
 				for(var aj=0;af<this.crew.lenght;aj++)
-					crew[aj].doDamage(rad,this.base.condition-this.current.codition);
+					crew[aj].doDamage(rad,this.server.base.condition-this.condition);
 			}
 		}
 		this.action
-		this.power=function()
+		this.power=function()//sets up the power action
 		{
 			//should check storage levels first
-			if(compForCompPurposes.partof.checkStorage('fuel',1));
+			if(compForCompPurposes.partof.checkStorage('fuel',-1));
 			{
 				compForCompPurposes.clear();
+				var planned=new actionInfo(compForCompPurposes.primary,'',compForCompPurposes)
+				planned.storageEffects.fuel=-1;
+				planned.storageEffects.energy=compForCompPurposes.force;
 				compForCompPurposes.partof.changeStorage('fuel',-1);
-				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.current.force);
-				var newStorageChange={name:'fuel',amount:-1};
-				compForCompPurposes.storageChanges.push(newStorageChange);
-				newStorageChange={name:'energy',amount:compForCompPurposes.current.force};
-				compForCompPurposes.storageChanges.push(newStorageChange);
+				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.force);
+				compForCompPurposes.planAction(planned);
 			}
 		}
 		this.actionList.push({name:'power',action:this.power});
 	}
+	this.setToBase();
 	return this;
 }
 var mainShip=ship;
 ship.mapX=19;
 ship.mapY=19;
-ship.addComponent(new createEngine(1,1,1,0,10),0,0);
+ship.addComponent(new createEngine(2,1,1,0,10),0,0);
 var comp=ship.comps[0][0];
-var newStorage={name:'energy',amount:'1'};
-console.log(mainShip.changeStorage(newStorage.name,newStorage.amount));
+var newStorage={name:'energy',amount:1};
+ship.storagePlan.fuel=10;
