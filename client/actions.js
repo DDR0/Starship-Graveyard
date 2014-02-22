@@ -122,6 +122,14 @@ var endturn=function()
 	{
 		plan.slowWeapons[an].comp.findFunction(plan.slowWeapons.name)(plan.slowWeapons.args);
 	}
+	//clear all the plans
+	plan.movement=[];
+	for(var at=0;at<mainShip.comps.length;at++)
+		for(var au=0;au<mainShip.comps[at].length;au++)
+		{
+			console.log('comps');
+			mainShip.comps[at][au].plannedActions=[];
+		}
 	//mainShip.finalizeStorage();
 	//actions.clearPlan();
 }

@@ -371,7 +371,7 @@ var simpleFunctions=
 		}
 		if(comp.attributes.radCore)
 		{
-			for(var af=0;af<crew.length;af++)
+			for(var af=0;af<comp.crew.length;af++)
 			{
 				comp.crew[af].doDamage('rad', this.comp.server.base.distance*(this.comp.server.base.condition-this.comp.condition));
 			}
@@ -462,7 +462,6 @@ function createEngine(index, style, level, mod, durability)
 	}
 	this.target=function(selected)
 	{
-		this.clearTarget();
 		var succesful=false;
 					console.log('made it this far');
 		if(this.partof.checkStorage('fuel',-2))//checking fuel
@@ -508,8 +507,8 @@ function createEngine(index, style, level, mod, durability)
 				plan.removeAction(this.plannedActions[ap]);
 				this.plannedActions.splice(ap,1);
 				ap--;
+				//also remove images
 			}
-			
 		}
 		this.plannedActions.push(newAction);
 		plan.movement.push(newAction);
@@ -519,25 +518,15 @@ function createEngine(index, style, level, mod, durability)
 		base.listenerStack.pop()//may need to do something fancy in future but for now we are treating it like a stack
 		//remove images
 	}
-	this.setIdel=function()
-	{
-		this.planned=null
-	}
 	this.clear=function()
 	{
-		//var index=location.targets.indexOf(this.imagePointer);
-		//if(index!=-1)//-1 means its already gone
-			//if(location.targets[index-1].comp===this)
-				//location.targets.splice(index,1);
-		for(arrays in plan)//I hope this works the way I think
-			index=arrays.indexOf(this.planned);
-			if(index!=-1)
-				arrays.splice(indes,1);
-		this.setIdel()
-	}
-	this.clearTarget=function()
-	{
-		this.clear();
+		for(var av=0;av<this.plannedActions.length;av++)//I hope this works the way I think
+		{
+			this.plannedActions[av].reverseStorage();
+			plan.removeAction(this.plannedActions[av]);
+			//also remove images
+		}
+		this.plannedActions=null;
 	}
 	this.server.doHeatDamage=[//I hope this works
 	function(damageArray)
@@ -613,23 +602,11 @@ function createEngine(index, style, level, mod, durability)
 		this.power=0;
 		this.name='NR Engine 2';
 		//add attributes
-		this.cleartarget=function()//as a default the engine generates energy
-		{
-			this.clear();
-			this.partof.changeStorage('energy',this.force,this);//this wont become permanent until the end of the turn
-			if(this.condition<this.server.base.condition)//will move this to idel function
-			{
-				for(var aj=0;af<this.crew.lenght;aj++)
-					crew[aj].doDamage(rad,this.server.base.condition-this.condition);
-			}
-		}
-		this.action
-		this.power=function()//sets up the power action
+		this.generateEnergy=function()//sets up the generateEnergy action
 		{
 			//should check storage levels first
 			if(compForCompPurposes.partof.checkStorage('fuel',-1));
 			{
-				compForCompPurposes.clear();
 				var planned=new actionInfo(compForCompPurposes.primary,'',compForCompPurposes)
 				planned.storageEffects.fuel=-1;
 				planned.storageEffects.energy=compForCompPurposes.force;
@@ -638,7 +615,7 @@ function createEngine(index, style, level, mod, durability)
 				compForCompPurposes.planAction(planned);
 			}
 		}
-		this.actionList.push({name:'power',action:this.power});
+		this.actionList.push({name:'Generate Energy',action:this.generateEnergy});
 	}
 	this.setToBase();
 	return this;
