@@ -24,10 +24,10 @@ app.listen(port, addr);
 // mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
 
 
-var available_rooms = {
+var available_comps = {//Components include rooms and the parts of your ship that have no room for crew but still take up a hex
 	__proto__: null,
-	'red base': true, 
-	'blue base': true,
+	'NR base': true, //the NR will be cyan coloured https://docs.google.com/document/d/15puliMOweI3JqverfQZApRqzlr9ZAe3byvWCVrEjiM4/edit
+	'Ablu base': true, //the Ablu will be yellow coloured we dont want to be cliche 
 	'battleground': true,
 };
 
@@ -76,7 +76,7 @@ io.sockets.once('connection', function(socket) {
 			});
 		
 			on('set location', function(dest) {
-				if(dest && available_rooms[dest]) {
+				if(dest && available_comps[dest]) {
 					user_data.room = dest;
 					socket.emit('ok');
 					return;
