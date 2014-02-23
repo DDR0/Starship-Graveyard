@@ -390,6 +390,7 @@ function createEngine(index, style, level, mod, durability)
 	this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
 	this.isDestroyed=false;
 	this.move=1;//identifier for a move function used with find function
+	this.generate=0;//identifier for a generate power function if one existed
 	this.only=10;//actions ranked only with stop all other planned actions except for passive
 	this.primary=8;//actions with a rank of primary allow for few other things to be done
 	//I'm leaving it open for other ranks
@@ -607,7 +608,7 @@ function createEngine(index, style, level, mod, durability)
 			//should check storage levels first
 			if(compForCompPurposes.partof.checkStorage('fuel',-1));
 			{
-				var planned=new actionInfo(compForCompPurposes.primary,'',compForCompPurposes)
+				var planned=new actionInfo(compForCompPurposes.primary,this.generate,compForCompPurposes)
 				planned.storageEffects.fuel=-1;
 				planned.storageEffects.energy=compForCompPurposes.force;
 				compForCompPurposes.partof.changeStorage('fuel',-1);
