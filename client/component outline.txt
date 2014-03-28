@@ -1,0 +1,24 @@
+all compontents will be created with the same parameters
+index-will state the broad type of component it is
+style-is the way it goes about its main purpose
+mod-is the model it covers more fine details like how it is effected by damage
+index, style and mod will become more clear when we get multiple components created
+level-how good a component is how much damage a weapon does etc.
+durability-is the total health of the component
+
+next is some basic variables for the component
+probably the only thing that needs explanation here is the rank system
+rank is used to say how much of the component is used by an action these are explained in more detail in the comments
+
+attributes will be a list of characteristics that the comp has
+
+server contains vars and functions that will be only on the server
+my original idea was to have the a complete version of the comp on the server that would execute the actions
+than a copy of it would be made the copies server would be set to null and it would be sent to the client
+I don't like this that much any more so I may do something different
+
+findFunction takes a string and returns a function ie takes 'move' and returns the basic move function for engines
+
+the startTarget and target functions are used to target in the case of the engine they set the direction of the thrust
+startTarget is bound to a buttonListener and amoung other things bind target to a mouseListener on the map
+

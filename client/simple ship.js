@@ -443,6 +443,8 @@ function createEngine(index, style, level, mod, durability)
 		console.log(name);
 		switch(name)
 		{
+			case(this.generage):
+			toReturn
 			case(this.move):
 			console.log('found move');
 			toReturn=simpleFunctions.move;
@@ -488,8 +490,8 @@ function createEngine(index, style, level, mod, durability)
 					planned.args=[this,relativeX,relativeY];//other stuff
 					planned.storageEffects.fuel=-2;
 					this.partof.forceStorage('fuel',-2);
-					plan.movement.push(planned);
 					this.planAction(planned);
+					plan.movement.push(planned);
 				}	
 			}	
 		}
@@ -512,7 +514,6 @@ function createEngine(index, style, level, mod, durability)
 			}
 		}
 		this.plannedActions.push(newAction);
-		plan.movement.push(newAction);
 	}
 	this.cancel=function()//stops the targeting process allowing the user to do other things
 	{

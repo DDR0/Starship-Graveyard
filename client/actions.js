@@ -78,6 +78,7 @@ var plan={
 	slowWeapons:[],//all other weapons most ship weapons are slow but must crew weapons are fast
 	removeAction:function(action)
 	{
+		console.log(action);
 		var index=plan.crewAssists.indexOf(action);
 		if(index>=0)
 			plan.crewAssists.splice(index,1);
@@ -90,7 +91,7 @@ var plan={
 		index=plan.movement.indexOf(action);
 		console.log(index);
 		if(index>=0)
-			plan.movement.splice(index,1);
+			console.log(plan.movement.splice(index,1));
 		index=plan.slowWeapons.indexOf(action);
 		if(index>=0)
 			plan.slowWeapons.splice(index,1);
