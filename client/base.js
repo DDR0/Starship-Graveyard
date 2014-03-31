@@ -403,6 +403,46 @@ var base=
 		this.shipX=null;
 		this.shipY=null;
 	},
+	simpleEngineGenerateStorage:function(ship)//contains storage effects for generating power
+	{
+		ship.forceStorage('fuel',-1);
+		ship.forceStorage('energy',this.force);
+	},
+	simpleEngineMove:function(args)//contains the action for a simple engine to move
+	{
+		console.log(args);
+		comp=args[0];
+		relativeX=args[1];
+		relativeY=args[2];
+		console.log(args,relativeY);
+		comp.partof.teleport(relativeX,relativeY);//change this when translate and collisions 
+		if(comp.attributes.selfPatch)
+		{
+			if(comp.force<this.comp.server.base.force)
+			{//this is to correct ion damage but I may need to improve how corrections are done
+				comp.force++;
+			}
+			if(comp.distance<this.comp.server.base.distance)
+			{
+				comp.distance++;
+			}
+		}
+		if(comp.attributes.radCore)
+		{
+			for(var af=0;af<comp.crew.length;af++)
+			{
+				comp.crew[af].doDamage('rad', this.comp.server.base.distance*(this.comp.server.base.condition-this.comp.condition));
+			}
+		}
+		else
+		{
+			//comp.enviroment.heat(this.comp.server.base.condition-this.comp.condition);
+		}
+	},
+	simpleEngineMoveStorage:function(ship)//contains the storage effects for an engine to move
+	{
+		ship.forceStorage('fuel',-2);
+	},
 }
 var backgroundImage=new Image();
 backgroundImage.src="images/Space Background.png";

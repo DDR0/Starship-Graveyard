@@ -352,34 +352,6 @@ var simpleFunctions=
 {
 	move:function(args)
 	{
-		console.log(args);
-		comp=args[0];
-		relativeX=args[1];
-		relativeY=args[2];
-		console.log(args,relativeY);
-		comp.partof.teleport(relativeX,relativeY);//change this when translate and collisions 
-		if(comp.attributes.selfPatch)
-		{
-			if(comp.force<this.comp.server.base.force)
-			{//this is to correct ion damage but I may need to improve how corrections are done
-				comp.force++;
-			}
-			if(comp.distance<this.comp.server.base.distance)
-			{
-				comp.distance++;
-			}
-		}
-		if(comp.attributes.radCore)
-		{
-			for(var af=0;af<comp.crew.length;af++)
-			{
-				comp.crew[af].doDamage('rad', this.comp.server.base.distance*(this.comp.server.base.condition-this.comp.condition));
-			}
-		}
-		else
-		{
-			//comp.enviroment.heat(this.comp.server.base.condition-this.comp.condition);
-		}
 	}
 };
 function createEngine(index, style, level, mod, durability)
@@ -389,8 +361,8 @@ function createEngine(index, style, level, mod, durability)
 	this.isSelected=false;
 	this.isSolid=true;//does the component block other comps don't actually know why I have this but I put it in the code
 	this.isDestroyed=false;
-	this.move=1;//identifier for a move function used with find function
-	this.generate=0;//identifier for a generate power function if one existed
+	this.move='move';//identifier for a move function used with find function
+	this.generate='power';//identifier for a generate power function if one existed
 	this.only=10;//actions ranked only with stop all other planned actions except for passive
 	this.primary=8;//actions with a rank of primary allow for few other things to be done
 	//I'm leaving it open for other ranks
@@ -437,20 +409,10 @@ function createEngine(index, style, level, mod, durability)
 			this[stat]=this.server.base[stat];
 		}
 	}
-	this.findFunction=function(name)
-	{
-		var toReturn=null;
-		console.log(name);
-		switch(name)
-		{
-			case(this.generage):
-			toReturn
-			case(this.move):
-			console.log('found move');
-			toReturn=simpleFunctions.move;
-		}
-		return toReturn
-	}
+	this.actionFunctions=[]//cant really think of a better way to do this
+	this.actionFunctions[this.move]=base.simpleEngineMove,
+	this.storageFunctions=[]
+	this.storageFunctions[this.move]=base.simpleEngineMoveStorage;
 	this.setToTarget=function()//gets everything ready to selected the target there is a whole lot to get ready trust me
 	{
 		base.listenerStack.push(compForCompPurposes.startTarget);
@@ -489,7 +451,7 @@ function createEngine(index, style, level, mod, durability)
 					planned=new actionInfo(this.primary,this.move,this);
 					planned.args=[this,relativeX,relativeY];//other stuff
 					planned.storageEffects.fuel=-2;
-					this.partof.forceStorage('fuel',-2);
+					this.storageFunctions[this.move](this.partof);
 					this.planAction(planned);
 					plan.movement.push(planned);
 				}	
@@ -602,6 +564,7 @@ function createEngine(index, style, level, mod, durability)
 		this.attributes.radCore=true;
 		this.server.base.power=0;
 		this.power=0;
+		this.storageFunctions[this.genterate]=base.simpleEngineGenerateStorage;
 		this.name='NR Engine 2';
 		//add attributes
 		this.generateEnergy=function()//sets up the generateEnergy action
@@ -612,8 +575,7 @@ function createEngine(index, style, level, mod, durability)
 				var planned=new actionInfo(compForCompPurposes.primary,this.generate,compForCompPurposes)
 				planned.storageEffects.fuel=-1;
 				planned.storageEffects.energy=compForCompPurposes.force;
-				compForCompPurposes.partof.changeStorage('fuel',-1);
-				compForCompPurposes.partof.changeStorage('energy',compForCompPurposes.force);
+				this.storageFunctions[this.generate](this.partof);
 				compForCompPurposes.planAction(planned);
 			}
 		}

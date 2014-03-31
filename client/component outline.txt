@@ -22,3 +22,4 @@ findFunction takes a string and returns a function ie takes 'move' and returns t
 the startTarget and target functions are used to target in the case of the engine they set the direction of the thrust
 startTarget is bound to a buttonListener and amoung other things bind target to a mouseListener on the map
 
+planAction adds an action to the plan it also compares rank and removes actions that have ranks with a sum greater than the maxRank

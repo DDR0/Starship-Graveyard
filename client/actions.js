@@ -115,9 +115,9 @@ var endturn=function()
 	{
 		plan.fastWeapons[an].comp.findFunction(plan.fastWeapons.name)(plan.fastWeapons.args);
 	}
-	for(var an=0;an<plan.movement.length;an++)
+	for(var an=0;an<plan.movement.length;an++)//this is the only one that has been kept up to date through the 3+ changes
 	{
-		plan.movement[an].component.findFunction(plan.movement[an].functionName)(plan.movement[an].args);
+		plan.movement[an].component.actionFunctions[plan.movement[an].functionName](plan.movement[an].args);
 	}
 	for(var an=0;an<plan.slowWeapons.length;an++)
 	{
