@@ -159,3 +159,5 @@ endTurnButton.width=200;
 endTurnButton.height=20;//don't know if these are the right variables.
 actions.prepare();
 base.actionsPointer=actions;
+base.
+var cContext=document.getElementById('body id').getContext('2d'),

@@ -261,7 +261,7 @@ var base=
 						}
 						if(this.isSelected)
 						{
-							base.cContext.drawImage(base.coursor,this.pixelX, this.pixelY);
+							//base.cContext.drawImage(base.coursor,this.pixelX, this.pixelY);
 						}
 					},
 					getDistance: function(otherX,otherY)
@@ -357,6 +357,10 @@ var base=
 	},
 	canvasClicked:function(event)
 	{
+		base.canvas.width=0;
+		document.getElementById('video frame').width=560;
+		document.getElementById('video frame').height=315;
+		document.getElementById('video frame').src="//www.youtube.com/embed/R_OfZurMuWk";		
 		var windowX=event.pageX;
 		var windowY=event.pageY;
 		var pixelX=windowX-$('#main-display').offset().left;
@@ -370,12 +374,12 @@ var base=
 		}
 		var map=base.hexify(windowX-$('#main-display').offset().left,windowY-$('#main-display').offset().top);
 		base.clearSelection();
-		if(false)
-		{
+		//if(false)
+		
 			base.hexes[map.x][map.y].isSelected=true;
 			base.hexes[map.x][map.y].restack();
 			base.cContext.drawImage(base.coursor,0,100);
-		}
+		
 		base.listenerStack[base.listenerStack.length-1](pixelX,pixelY)
 	},
 	//most of the component code will be on the server
@@ -450,7 +454,29 @@ var coursor=new Image();
 coursor.src="images/onehex.png";
 document.getElementById('main-display').onclick=base.canvasClicked;
 base.newHexes();
-if(false)
+//if(false)
+var shipImage=new Image();
+shipImage.src='images/3 room ship.png';
+shipImage.addEventListener('load',function()
+{
+	var shipImages=base.hexifyImage(shipImage);
+	var placeShip=function()
+	{
+		for(var at=0;at<shipImages.length;at++)
+		{
+			for(var au=0;au<shipImages[at].length;au++)
+			{
+				base.hexes[at+4][au+4].seeShip=true;
+				base.hexes[at+4][au+4].shipImage=shipImages[at][au];
+				base.restackAll();
+			}
+		}
+	};
+	if(base.hexes!=undefined)
+		placeShip();
+	else
+		backgroundImage.addEventListener('load',placeShip);
+});
 backgroundImage.addEventListener('load',  function()
 {
 	var images=base.hexifyImage(backgroundImage);
